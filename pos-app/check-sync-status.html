@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Estado de Sincronización</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Verificador de Estado de Sincronización</h1>
+    
+    <div id="status"></div>
+    
+    <div>
+        <button onclick="checkSyncStatus()">Verificar Estado</button>
+        <button onclick="initSync()">Inicializar Sincronización</button>
+        <button onclick="clearSyncData()">Limpiar Datos de Sincronización</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script type="module">
+        import Dexie from 'https://unpkg.com/dexie@3.2.4/dist/dexie.es.mjs';
+        
+        // Definir la base de datos igual que en la app
+        class POSDB extends Dexie {
+            catalog_products;
+            catalog_customers;
+            meta;
+            
+            constructor() {
+                super("posdb");
+                this.version(4).stores({
+                    catalog_products: "id, sku, name, updatedAt, isActive",
+                    catalog_customers: "id, code, name, updatedAt, isActive",
+                    sales_drafts: "id, customerId, createdAt, updatedAt",
+                    offline_sales: "id, status, createdAt, syncedAt",
+                    meta: "key",
+                });
+            }
+        }
+        
+        const db = new POSDB();
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function showResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+        async function checkSyncStatus() {
+            try {
+                showStatus('Verificando estado de sincronización...', 'info');
+                
+                // Verificar metadatos de sincronización
+                const [productsMeta, customersMeta] = await Promise.all([
+                    db.meta.get('lastSyncProducts'),
+                    db.meta.get('lastSyncCustomers')
+                ]);
+                
+                // Contar registros en las tablas
+                const [productsCount, customersCount] = await Promise.all([
+                    db.catalog_products.count(),
+                    db.catalog_customers.count()
+                ]);
+                
+                const status = {
+                    metadata: {
+                        lastSyncProducts: productsMeta?.value || null,
+                        lastSyncCustomers: customersMeta?.value || null
+                    },
+                    counts: {
+                        products: productsCount,
+                        customers: customersCount
+                    },
+                    status: {
+                        hasProducts: productsCount > 0,
+                        hasCustomers: customersCount > 0,
+                        hasSyncMetadata: !!(productsMeta || customersMeta),
+                        neverSynced: !productsMeta && !customersMeta
+                    }
+                };
+                
+                showResults(status);
+                
+                if (status.status.neverSynced) {
+                    showStatus('⚠️ Nunca se ha sincronizado. Ejecuta "Inicializar Sincronización"', 'warning');
+                } else if (status.status.hasProducts && status.status.hasCustomers) {
+                    showStatus('✅ Sincronización funcionando correctamente', 'success');
+                } else {
+                    showStatus('⚠️ Sincronización parcial. Algunos datos faltan', 'warning');
+                }
+                
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error('Error checking sync status:', error);
+            }
+        }
+        
+        async function initSync() {
+            try {
+                showStatus('Inicializando sincronización...', 'info');
+                
+                // Simular sincronización estableciendo metadatos
+                const now = new Date().toISOString();
+                await Promise.all([
+                    db.meta.put({ key: 'lastSyncProducts', value: now }),
+                    db.meta.put({ key: 'lastSyncCustomers', value: now })
+                ]);
+                
+                showStatus('✅ Metadatos de sincronización inicializados', 'success');
+                
+                // Verificar estado actualizado
+                setTimeout(checkSyncStatus, 1000);
+                
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error('Error initializing sync:', error);
+            }
+        }
+        
+        async function clearSyncData() {
+            try {
+                showStatus('Limpiando datos de sincronización...', 'info');
+                
+                await Promise.all([
+                    db.meta.delete('lastSyncProducts'),
+                    db.meta.delete('lastSyncCustomers')
+                ]);
+                
+                showStatus('✅ Datos de sincronización limpiados', 'success');
+                
+                // Verificar estado actualizado
+                setTimeout(checkSyncStatus, 1000);
+                
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error('Error clearing sync data:', error);
+            }
+        }
+        
+        // Hacer las funciones globales
+        window.checkSyncStatus = checkSyncStatus;
+        window.initSync = initSync;
+        window.clearSyncData = clearSyncData;
+        
+        // Verificar estado al cargar
+        checkSyncStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Cálculo de Precios - Edición de Cantidades</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .product-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .price-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #666;
+        }
+        .new-price {
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-field label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+        .input-field input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .input-field input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .summary {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .summary h3 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .summary-total {
+            font-weight: bold;
+            font-size: 18px;
+            color: #1e40af;
+            border-top: 1px solid #bfdbfe;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #2563eb; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Test de Cálculo de Precios - Edición de Cantidades</h1>
+        <p>Este test simula la funcionalidad de edición de cantidades y verifica que los precios se calculen correctamente en tiempo real.</p>
+
+        <div class="test-section info">
+            <h3>📋 Instrucciones del Test</h3>
+            <ol>
+                <li><strong>Modifica las cantidades</strong> de los productos usando los campos de entrada</li>
+                <li><strong>Observa</strong> cómo se actualizan los precios en tiempo real</li>
+                <li><strong>Verifica</strong> que el cálculo de subtotal, impuestos y total sea correcto</li>
+                <li><strong>Compara</strong> los precios originales (tachados) con los nuevos precios</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🛒 Productos de Prueba</h3>
+            <div id="products-container">
+                <!-- Los productos se generarán dinámicamente -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Resumen de Cambios</h3>
+            <div id="summary-container" class="summary">
+                <h3>Resumen de Cambios</h3>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <div class="price-display">
+                        <span class="original-price" id="original-subtotal">Q 0.00</span>
+                        <span class="new-price" id="new-subtotal">Q 0.00</span>
+                    </div>
+                </div>
+                <div class="summary-row">
+                    <span>Impuestos (12%):</span>
+                    <div class="price-display">
+                        <span class="original-price" id="original-tax">Q 0.00</span>
+                        <span class="new-price" id="new-tax">Q 0.00</span>
+                    </div>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total:</span>
+                    <div class="price-display">
+                        <span class="original-price" id="original-total">Q 0.00</span>
+                        <span class="new-price" id="new-total">Q 0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Herramientas de Test</h3>
+            <button onclick="resetQuantities()">Restablecer Cantidades</button>
+            <button onclick="testCalculation()">Verificar Cálculos</button>
+            <button onclick="addRandomProduct()">Agregar Producto Aleatorio</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Log de Eventos</h3>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de prueba
+        let products = [
+            {
+                id: 1,
+                name: "Arroz 1kg",
+                sku: "PROD001",
+                priceUnit: 1.80,
+                qty: 2,
+                qtyBase: 2,
+                taxRate: 12
+            },
+            {
+                id: 2,
+                name: "Frijoles 500g",
+                sku: "PROD002", 
+                priceUnit: 2.50,
+                qty: 1,
+                qtyBase: 1,
+                taxRate: 12
+            },
+            {
+                id: 3,
+                name: "Aceite 1L",
+                sku: "PROD003",
+                priceUnit: 8.00,
+                qty: 1,
+                qtyBase: 1,
+                taxRate: 12
+            }
+        ];
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#6c757d';
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-GT', {
+                style: 'currency',
+                currency: 'GTQ'
+            }).format(amount);
+        }
+
+        function calculateItemTotal(product) {
+            return product.qty * product.priceUnit;
+        }
+
+        function calculateTotals() {
+            let subtotal = 0;
+            let taxTotal = 0;
+
+            products.forEach(product => {
+                const itemTotal = calculateItemTotal(product);
+                subtotal += itemTotal;
+                taxTotal += itemTotal * (product.taxRate / 100);
+            });
+
+            return {
+                subtotal,
+                taxTotal,
+                grandTotal: subtotal + taxTotal
+            };
+        }
+
+        function updateSummary() {
+            const totals = calculateTotals();
+            
+            document.getElementById('original-subtotal').textContent = formatCurrency(totals.subtotal);
+            document.getElementById('new-subtotal').textContent = formatCurrency(totals.subtotal);
+            document.getElementById('original-tax').textContent = formatCurrency(totals.taxTotal);
+            document.getElementById('new-tax').textContent = formatCurrency(totals.taxTotal);
+            document.getElementById('original-total').textContent = formatCurrency(totals.grandTotal);
+            document.getElementById('new-total').textContent = formatCurrency(totals.grandTotal);
+        }
+
+        function updateProductDisplay(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const productElement = document.getElementById(`product-${productId}`);
+            const originalTotal = product.qty * product.priceUnit;
+            const newTotal = product.qty * product.priceUnit;
+
+            const priceDisplay = productElement.querySelector('.price-display');
+            priceDisplay.innerHTML = `
+                <span class="original-price">${formatCurrency(originalTotal)}</span>
+                <span class="new-price">${formatCurrency(newTotal)}</span>
+            `;
+
+            updateSummary();
+            log(`Producto ${product.name} actualizado: ${formatCurrency(newTotal)}`, 'info');
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product-item';
+                productDiv.id = `product-${product.id}`;
+                
+                productDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <h4 style="margin: 0; color: #1f2937;">${product.name}</h4>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">${product.sku}</p>
+                        </div>
+                        <div class="price-display">
+                            <span class="original-price">${formatCurrency(calculateItemTotal(product))}</span>
+                            <span class="new-price">${formatCurrency(calculateItemTotal(product))}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label>Cantidad (${product.sku.includes('kg') ? 'kg' : 'UND'})</label>
+                            <input 
+                                type="number" 
+                                min="0" 
+                                step="0.01" 
+                                value="${product.qty}"
+                                onchange="updateProductQuantity(${product.id}, 'qty', this.value)"
+                            />
+                        </div>
+                        <div class="input-field">
+                            <label>Cantidad Base (UND)</label>
+                            <input 
+                                type="number" 
+                                min="0" 
+                                step="0.01" 
+                                value="${product.qtyBase}"
+                                onchange="updateProductQuantity(${product.id}, 'qtyBase', this.value)"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 14px; color: #6b7280;">
+                        <span style="font-weight: 500;">Precio:</span> ${formatCurrency(product.priceUnit)} c/u • 
+                        <span style="font-weight: 500;">Impuesto:</span> ${product.taxRate}%
+                    </div>
+                `;
+                
+                container.appendChild(productDiv);
+            });
+
+            updateSummary();
+        }
+
+        function updateProductQuantity(productId, field, value) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const newValue = parseFloat(value) || 0;
+            
+            if (field === 'qty') {
+                product.qty = newValue;
+                // Recalcular qtyBase basado en la proporción original
+                const originalRatio = product.qtyBase / product.qty;
+                product.qtyBase = newValue * originalRatio;
+            } else if (field === 'qtyBase') {
+                product.qtyBase = newValue;
+                // Recalcular qty basado en la proporción original
+                const originalRatio = product.qty / product.qtyBase;
+                product.qty = newValue * originalRatio;
+            }
+
+            // Actualizar el otro campo de entrada
+            const productElement = document.getElementById(`product-${productId}`);
+            const inputs = productElement.querySelectorAll('input');
+            inputs[0].value = product.qty.toFixed(2);
+            inputs[1].value = product.qtyBase.toFixed(2);
+
+            updateProductDisplay(productId);
+        }
+
+        function resetQuantities() {
+            products.forEach(product => {
+                product.qty = product.qty;
+                product.qtyBase = product.qtyBase;
+            });
+            renderProducts();
+            log('Cantidades restablecidas', 'success');
+        }
+
+        function testCalculation() {
+            log('🧮 Verificando cálculos...', 'info');
+            
+            let allCorrect = true;
+            products.forEach(product => {
+                const expectedTotal = product.qty * product.priceUnit;
+                const actualTotal = calculateItemTotal(product);
+                
+                if (Math.abs(expectedTotal - actualTotal) > 0.01) {
+                    log(`❌ Error en ${product.name}: esperado ${formatCurrency(expectedTotal)}, obtenido ${formatCurrency(actualTotal)}`, 'error');
+                    allCorrect = false;
+                } else {
+                    log(`✅ ${product.name}: ${formatCurrency(actualTotal)} (correcto)`, 'success');
+                }
+            });
+
+            const totals = calculateTotals();
+            log(`📊 Totales: Subtotal ${formatCurrency(totals.subtotal)}, Impuestos ${formatCurrency(totals.taxTotal)}, Total ${formatCurrency(totals.grandTotal)}`, 'info');
+            
+            if (allCorrect) {
+                log('🎉 Todos los cálculos son correctos!', 'success');
+            }
+        }
+
+        function addRandomProduct() {
+            const newProduct = {
+                id: products.length + 1,
+                name: `Producto ${products.length + 1}`,
+                sku: `PROD${String(products.length + 1).padStart(3, '0')}`,
+                priceUnit: Math.round(Math.random() * 20 * 100) / 100,
+                qty: Math.floor(Math.random() * 5) + 1,
+                qtyBase: Math.floor(Math.random() * 5) + 1,
+                taxRate: 12
+            };
+            
+            products.push(newProduct);
+            renderProducts();
+            log(`Producto agregado: ${newProduct.name} - ${formatCurrency(newProduct.priceUnit)} c/u`, 'success');
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Test de cálculo de precios iniciado', 'success');
+            renderProducts();
+        });
+    </script>
+</body>
+</html>
+
+

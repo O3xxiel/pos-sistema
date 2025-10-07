@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Adición de Stock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .product-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .stock-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .current-stock {
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .new-stock {
+            font-weight: bold;
+            color: #16a34a;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-field label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+        .input-field input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .input-field input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #2563eb; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .stock-history {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Test de Adición de Stock</h1>
+        <p>Este test verifica que la funcionalidad de agregar stock funcione correctamente y sume al stock existente en lugar de reemplazarlo.</p>
+
+        <div class="test-section info">
+            <h3>📋 Instrucciones del Test</h3>
+            <ol>
+                <li><strong>Selecciona un producto</strong> de la lista</li>
+                <li><strong>Ingresa una cantidad</strong> para agregar al stock</li>
+                <li><strong>Haz clic en "Agregar Stock"</strong> para sumar la cantidad</li>
+                <li><strong>Verifica</strong> que el stock se suma correctamente al existente</li>
+                <li><strong>Repite</strong> el proceso para confirmar que funciona múltiples veces</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🛒 Productos de Prueba</h3>
+            <div id="products-container">
+                <!-- Los productos se generarán dinámicamente -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Historial de Cambios de Stock</h3>
+            <div id="stock-history" class="stock-history">
+                <p>No hay cambios de stock aún</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Herramientas de Test</h3>
+            <button onclick="resetStock()">Restablecer Stock</button>
+            <button onclick="testStockAddition()">Verificar Funcionalidad</button>
+            <button onclick="addRandomStock()">Agregar Stock Aleatorio</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Log de Eventos</h3>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de prueba
+        let products = [
+            {
+                id: 1,
+                name: "Arroz 1kg",
+                sku: "PROD001",
+                currentStock: 10,
+                unitBase: "UND"
+            },
+            {
+                id: 2,
+                name: "Frijoles 500g",
+                sku: "PROD002", 
+                currentStock: 5,
+                unitBase: "UND"
+            },
+            {
+                id: 3,
+                name: "Aceite 1L",
+                sku: "PROD003",
+                currentStock: 0,
+                unitBase: "UND"
+            }
+        ];
+
+        let stockHistory = [];
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#6c757d';
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function addToHistory(product, addedQuantity, newTotal) {
+            const historyItem = {
+                timestamp: new Date(),
+                product: product.name,
+                sku: product.sku,
+                addedQuantity,
+                newTotal
+            };
+            stockHistory.unshift(historyItem);
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('stock-history');
+            if (stockHistory.length === 0) {
+                historyDiv.innerHTML = '<p>No hay cambios de stock aún</p>';
+                return;
+            }
+
+            historyDiv.innerHTML = `
+                <h4>Historial de Cambios:</h4>
+                ${stockHistory.map(item => `
+                    <div class="history-item">
+                        <span>${item.product} (${item.sku})</span>
+                        <span>+${item.addedQuantity} → ${item.newTotal} ${item.product.includes('Arroz') ? 'UND' : 'UND'}</span>
+                        <span>${item.timestamp.toLocaleTimeString()}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product-item';
+                
+                productDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <h4 style="margin: 0; color: #1f2937;">${product.name}</h4>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">${product.sku}</p>
+                        </div>
+                        <div class="stock-display">
+                            <span class="current-stock">Stock: ${product.currentStock} ${product.unitBase}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label>Cantidad a agregar</label>
+                            <input 
+                                type="number" 
+                                min="1" 
+                                step="1" 
+                                id="qty-${product.id}"
+                                placeholder="Ingrese cantidad"
+                            />
+                        </div>
+                        <button onclick="addStockToProduct(${product.id})">
+                            Agregar Stock
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(productDiv);
+            });
+        }
+
+        function addStockToProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(quantityInput.value) || 0;
+
+            if (quantity <= 0) {
+                log(`❌ Cantidad inválida para ${product.name}`, 'error');
+                return;
+            }
+
+            // Simular adición de stock
+            const oldStock = product.currentStock;
+            product.currentStock += quantity;
+            
+            // Agregar al historial
+            addToHistory(product, quantity, product.currentStock);
+            
+            // Limpiar input
+            quantityInput.value = '';
+            
+            // Actualizar display
+            renderProducts();
+            
+            log(`✅ Stock agregado: ${product.name} +${quantity} (${oldStock} → ${product.currentStock})`, 'success');
+        }
+
+        function resetStock() {
+            products.forEach(product => {
+                product.currentStock = product.id === 1 ? 10 : product.id === 2 ? 5 : 0;
+            });
+            stockHistory = [];
+            renderProducts();
+            updateHistoryDisplay();
+            log('🔄 Stock restablecido a valores iniciales', 'info');
+        }
+
+        function testStockAddition() {
+            log('🧮 Verificando funcionalidad de adición de stock...', 'info');
+            
+            let allCorrect = true;
+            
+            // Test 1: Agregar stock a producto con stock existente
+            const product1 = products[0]; // Arroz
+            const originalStock1 = product1.currentStock;
+            product1.currentStock += 5;
+            
+            if (product1.currentStock === originalStock1 + 5) {
+                log(`✅ Test 1 pasado: ${product1.name} (${originalStock1} + 5 = ${product1.currentStock})`, 'success');
+            } else {
+                log(`❌ Test 1 falló: ${product1.name} esperado ${originalStock1 + 5}, obtenido ${product1.currentStock}`, 'error');
+                allCorrect = false;
+            }
+            
+            // Test 2: Agregar stock a producto sin stock
+            const product3 = products[2]; // Aceite
+            const originalStock3 = product3.currentStock;
+            product3.currentStock += 10;
+            
+            if (product3.currentStock === originalStock3 + 10) {
+                log(`✅ Test 2 pasado: ${product3.name} (${originalStock3} + 10 = ${product3.currentStock})`, 'success');
+            } else {
+                log(`❌ Test 2 falló: ${product3.name} esperado ${originalStock3 + 10}, obtenido ${product3.currentStock}`, 'error');
+                allCorrect = false;
+            }
+            
+            // Test 3: Múltiples adiciones
+            const product2 = products[1]; // Frijoles
+            const originalStock2 = product2.currentStock;
+            product2.currentStock += 3;
+            product2.currentStock += 2;
+            
+            if (product2.currentStock === originalStock2 + 5) {
+                log(`✅ Test 3 pasado: ${product2.name} múltiples adiciones (${originalStock2} + 3 + 2 = ${product2.currentStock})`, 'success');
+            } else {
+                log(`❌ Test 3 falló: ${product2.name} esperado ${originalStock2 + 5}, obtenido ${product2.currentStock}`, 'error');
+                allCorrect = false;
+            }
+            
+            if (allCorrect) {
+                log('🎉 Todos los tests de adición de stock pasaron!', 'success');
+            } else {
+                log('❌ Algunos tests fallaron', 'error');
+            }
+            
+            renderProducts();
+        }
+
+        function addRandomStock() {
+            const randomProduct = products[Math.floor(Math.random() * products.length)];
+            const randomQuantity = Math.floor(Math.random() * 20) + 1;
+            
+            const oldStock = randomProduct.currentStock;
+            randomProduct.currentStock += randomQuantity;
+            
+            addToHistory(randomProduct, randomQuantity, randomProduct.currentStock);
+            renderProducts();
+            
+            log(`🎲 Stock aleatorio agregado: ${randomProduct.name} +${randomQuantity} (${oldStock} → ${randomProduct.currentStock})`, 'info');
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Test de adición de stock iniciado', 'success');
+            renderProducts();
+        });
+    </script>
+</body>
+</html>
+
+

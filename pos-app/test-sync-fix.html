@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Sincronización - Edición de Cantidades</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Sincronización - Edición de Cantidades</h1>
+        <p>Este test verifica que los cambios de cantidad realizados por un admin en el módulo de conflictos se reflejen correctamente en la vista de vendedores.</p>
+
+        <div class="test-section info">
+            <h3>📋 Instrucciones del Test</h3>
+            <ol>
+                <li><strong>Crear una venta offline</strong> con productos que tengan stock insuficiente</li>
+                <li><strong>Sincronizar la venta</strong> - debería quedar en estado "REVIEW_REQUIRED"</li>
+                <li><strong>Como admin</strong>, ir al módulo de "Revisión de Conflictos"</li>
+                <li><strong>Editar las cantidades</strong> de los productos en conflicto</li>
+                <li><strong>Verificar</strong> que la venta se actualice automáticamente en la vista de vendedores</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Herramientas de Test</h3>
+            <button onclick="testSyncStatus()">Verificar Estado de Sincronización</button>
+            <button onclick="testOfflineSales()">Ver Ventas Offline</button>
+            <button onclick="clearTestData()">Limpiar Datos de Test</button>
+            <button onclick="simulateAdminEdit()">Simular Edición de Admin</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estado Actual</h3>
+            <div id="status">Cargando...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Log de Eventos</h3>
+            <div id="log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ Resultados del Test</h3>
+            <div id="results">
+                <p>Ejecuta los pasos del test para ver los resultados aquí.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let authToken = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#6c757d';
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function getAuthToken() {
+            if (authToken) return authToken;
+            
+            try {
+                // Simular login (en un test real, usarías credenciales reales)
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'test_seller',
+                        password: 'password123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    log('✅ Token de autenticación obtenido', 'success');
+                    return authToken;
+                } else {
+                    throw new Error('Error de autenticación');
+                }
+            } catch (error) {
+                log(`❌ Error obteniendo token: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        async function testSyncStatus() {
+            log('🔍 Verificando estado de sincronización...');
+            
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+
+                const response = await fetch(`${API_URL}/sales/offline/status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Estado obtenido: ${data.totalPending} ventas pendientes`, 'success');
+                    
+                    document.getElementById('status').innerHTML = `
+                        <p><strong>Vendedor ID:</strong> ${data.sellerId}</p>
+                        <p><strong>Ventas Pendientes:</strong> ${data.totalPending}</p>
+                        <p><strong>Ventas en Revisión:</strong> ${data.sales.filter(s => s.status === 'REVIEW_REQUIRED').length}</p>
+                        <p><strong>Ventas Confirmadas:</strong> ${data.sales.filter(s => s.status === 'CONFIRMED').length}</p>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ Error verificando estado: ${error.message}`, 'error');
+            }
+        }
+
+        async function testOfflineSales() {
+            log('📦 Obteniendo ventas offline...');
+            
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+
+                const response = await fetch(`${API_URL}/sales/offline`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Ventas offline obtenidas: ${data.sales.length} ventas`, 'success');
+                    
+                    const salesList = data.sales.map(sale => `
+                        <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <strong>ID:</strong> ${sale.id} | 
+                            <strong>Estado:</strong> ${sale.status} | 
+                            <strong>Total:</strong> $${sale.grandTotal} | 
+                            <strong>Cliente:</strong> ${sale.customerName}
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('status').innerHTML = `
+                        <h4>Ventas Offline:</h4>
+                        ${salesList || '<p>No hay ventas offline</p>'}
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ Error obteniendo ventas offline: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearTestData() {
+            log('🧹 Limpiando datos de test...');
+            
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+
+                // Aquí podrías implementar un endpoint para limpiar datos de test
+                log('⚠️ Función de limpieza no implementada en el backend', 'error');
+            } catch (error) {
+                log(`❌ Error limpiando datos: ${error.message}`, 'error');
+            }
+        }
+
+        async function simulateAdminEdit() {
+            log('👨‍💼 Simulando edición de admin...');
+            
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+
+                // Obtener conflictos primero
+                const conflictsResponse = await fetch(`${API_URL}/sales/conflicts`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (conflictsResponse.ok) {
+                    const conflicts = await conflictsResponse.json();
+                    log(`📋 Conflictos encontrados: ${conflicts.length}`, 'info');
+                    
+                    if (conflicts.length > 0) {
+                        const firstConflict = conflicts[0];
+                        log(`🔧 Editando conflicto ID: ${firstConflict.id}`, 'info');
+                        
+                        // Simular edición de cantidades
+                        const editResponse = await fetch(`${API_URL}/sales/conflicts/resolve`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                action: 'EDIT_QUANTITIES',
+                                saleId: firstConflict.id,
+                                items: firstConflict.items.map(item => ({
+                                    id: item.id,
+                                    newQty: item.qty * 0.8, // Reducir cantidad en 20%
+                                    newQtyBase: item.qtyBase * 0.8
+                                })),
+                                notes: 'Test de edición de cantidades'
+                            })
+                        });
+
+                        if (editResponse.ok) {
+                            log('✅ Edición de cantidades completada', 'success');
+                            
+                            // Verificar que el cambio se refleje
+                            setTimeout(() => {
+                                testSyncStatus();
+                                log('🔄 Verificando cambios después de 2 segundos...', 'info');
+                            }, 2000);
+                        } else {
+                            throw new Error(`Error editando cantidades: ${editResponse.status}`);
+                        }
+                    } else {
+                        log('⚠️ No hay conflictos para editar', 'error');
+                    }
+                } else {
+                    throw new Error(`Error obteniendo conflictos: ${conflictsResponse.status}`);
+                }
+            } catch (error) {
+                log(`❌ Error simulando edición: ${error.message}`, 'error');
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Test de sincronización iniciado', 'success');
+            testSyncStatus();
+        });
+    </script>
+</body>
+</html>
+
+

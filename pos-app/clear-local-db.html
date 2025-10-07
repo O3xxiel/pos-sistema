@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpiar Base de Datos Local</title>
+</head>
+<body>
+    <h1>Limpiar Base de Datos Local</h1>
+    <button onclick="clearLocalDB()">Limpiar Base de Datos Local</button>
+    <div id="result"></div>
+
+    <script>
+        async function clearLocalDB() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Limpiando...';
+            
+            try {
+                // Abrir la base de datos
+                const db = indexedDB.open('posdb');
+                
+                db.onsuccess = function(event) {
+                    const database = event.target.result;
+                    
+                    // Limpiar cada tabla
+                    const clearPromises = [
+                        clearTable(database, 'catalog_products'),
+                        clearTable(database, 'catalog_customers'),
+                        clearTable(database, 'sales_drafts'),
+                        clearTable(database, 'offline_sales'),
+                        clearTable(database, 'meta')
+                    ];
+                    
+                    Promise.all(clearPromises).then(() => {
+                        resultDiv.innerHTML = '✅ Base de datos local limpiada exitosamente';
+                        database.close();
+                    }).catch(error => {
+                        resultDiv.innerHTML = '❌ Error: ' + error.message;
+                        database.close();
+                    });
+                };
+                
+                db.onerror = function(event) {
+                    resultDiv.innerHTML = '❌ Error abriendo la base de datos: ' + event.target.error;
+                };
+                
+            } catch (error) {
+                resultDiv.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+        
+        function clearTable(database, tableName) {
+            return new Promise((resolve, reject) => {
+                const transaction = database.transaction([tableName], 'readwrite');
+                const store = transaction.objectStore(tableName);
+                const clearRequest = store.clear();
+                
+                clearRequest.onsuccess = function() {
+                    console.log(`✅ Tabla ${tableName} limpiada`);
+                    resolve();
+                };
+                
+                clearRequest.onerror = function() {
+                    console.log(`❌ Error limpiando tabla ${tableName}`);
+                    reject(clearRequest.error);
+                };
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+

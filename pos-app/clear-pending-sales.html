@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpiar Ventas Pendientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpiar Ventas Pendientes</h1>
+        <p>Esta herramienta eliminará todas las ventas offline que están pendientes de sincronización o en revisión.</p>
+        
+        <button onclick="clearPendingSales()" id="clearBtn">Limpiar Ventas Pendientes</button>
+        <button onclick="checkPendingSales()" id="checkBtn">Verificar Ventas Pendientes</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function clearPendingSales() {
+            const resultDiv = document.getElementById('result');
+            const clearBtn = document.getElementById('clearBtn');
+            const checkBtn = document.getElementById('checkBtn');
+            
+            clearBtn.disabled = true;
+            checkBtn.disabled = true;
+            resultDiv.innerHTML = '<div class="info">🧹 Limpiando ventas pendientes...</div>';
+            
+            try {
+                // Abrir la base de datos
+                const db = indexedDB.open('posdb');
+                
+                db.onsuccess = function(event) {
+                    const database = event.target.result;
+                    
+                    // Obtener todas las ventas pendientes
+                    const transaction = database.transaction(['offline_sales'], 'readwrite');
+                    const store = transaction.objectStore('offline_sales');
+                    const index = store.index('status');
+                    
+                    // Obtener ventas PENDING_SYNC
+                    const pendingRequest = index.getAll('PENDING_SYNC');
+                    const reviewRequest = index.getAll('REVIEW_REQUIRED');
+                    
+                    let totalDeleted = 0;
+                    let pendingCount = 0;
+                    let reviewCount = 0;
+                    
+                    pendingRequest.onsuccess = function() {
+                        pendingCount = pendingRequest.result.length;
+                        console.log(`📊 Encontradas ${pendingCount} ventas PENDING_SYNC`);
+                        
+                        // Eliminar ventas PENDING_SYNC
+                        pendingRequest.result.forEach(sale => {
+                            store.delete(sale.id);
+                            totalDeleted++;
+                            console.log(`🗑️ Eliminada venta PENDING_SYNC: ${sale.id}`);
+                        });
+                    };
+                    
+                    reviewRequest.onsuccess = function() {
+                        reviewCount = reviewRequest.result.length;
+                        console.log(`📊 Encontradas ${reviewCount} ventas REVIEW_REQUIRED`);
+                        
+                        // Eliminar ventas REVIEW_REQUIRED
+                        reviewRequest.result.forEach(sale => {
+                            store.delete(sale.id);
+                            totalDeleted++;
+                            console.log(`🗑️ Eliminada venta REVIEW_REQUIRED: ${sale.id}`);
+                        });
+                    };
+                    
+                    transaction.oncomplete = function() {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                ✅ Limpieza completada exitosamente<br>
+                                📊 Ventas eliminadas: ${totalDeleted}<br>
+                                📋 PENDING_SYNC: ${pendingCount}<br>
+                                📋 REVIEW_REQUIRED: ${reviewCount}
+                            </div>
+                        `;
+                        database.close();
+                        clearBtn.disabled = false;
+                        checkBtn.disabled = false;
+                    };
+                    
+                    transaction.onerror = function() {
+                        resultDiv.innerHTML = '<div class="error">❌ Error durante la limpieza: ' + transaction.error + '</div>';
+                        database.close();
+                        clearBtn.disabled = false;
+                        checkBtn.disabled = false;
+                    };
+                };
+                
+                db.onerror = function(event) {
+                    resultDiv.innerHTML = '<div class="error">❌ Error abriendo la base de datos: ' + event.target.error + '</div>';
+                    clearBtn.disabled = false;
+                    checkBtn.disabled = false;
+                };
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+                clearBtn.disabled = false;
+                checkBtn.disabled = false;
+            }
+        }
+        
+        async function checkPendingSales() {
+            const resultDiv = document.getElementById('result');
+            const checkBtn = document.getElementById('checkBtn');
+            
+            checkBtn.disabled = true;
+            resultDiv.innerHTML = '<div class="info">🔍 Verificando ventas pendientes...</div>';
+            
+            try {
+                // Abrir la base de datos
+                const db = indexedDB.open('posdb');
+                
+                db.onsuccess = function(event) {
+                    const database = event.target.result;
+                    
+                    // Obtener todas las ventas pendientes
+                    const transaction = database.transaction(['offline_sales'], 'readonly');
+                    const store = transaction.objectStore('offline_sales');
+                    const index = store.index('status');
+                    
+                    // Obtener ventas PENDING_SYNC
+                    const pendingRequest = index.getAll('PENDING_SYNC');
+                    const reviewRequest = index.getAll('REVIEW_REQUIRED');
+                    
+                    pendingRequest.onsuccess = function() {
+                        const pendingCount = pendingRequest.result.length;
+                        console.log(`📊 Ventas PENDING_SYNC: ${pendingCount}`);
+                        
+                        reviewRequest.onsuccess = function() {
+                            const reviewCount = reviewRequest.result.length;
+                            console.log(`📊 Ventas REVIEW_REQUIRED: ${reviewCount}`);
+                            
+                            const total = pendingCount + reviewCount;
+                            
+                            resultDiv.innerHTML = `
+                                <div class="info">
+                                    📊 Estado actual de ventas pendientes:<br>
+                                    📋 PENDING_SYNC: ${pendingCount}<br>
+                                    📋 REVIEW_REQUIRED: ${reviewCount}<br>
+                                    📈 Total: ${total}
+                                </div>
+                            `;
+                            database.close();
+                            checkBtn.disabled = false;
+                        };
+                    };
+                };
+                
+                db.onerror = function(event) {
+                    resultDiv.innerHTML = '<div class="error">❌ Error abriendo la base de datos: ' + event.target.error + '</div>';
+                    checkBtn.disabled = false;
+                };
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+                checkBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
