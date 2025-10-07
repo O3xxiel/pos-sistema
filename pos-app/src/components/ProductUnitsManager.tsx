@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../state/auth';
+import { API_URL } from '../data/api';
 
 // Tipos
 interface Unit {
@@ -29,7 +30,7 @@ interface ProductUnitsManagerProps {
 
 // API functions
 const fetchAvailableUnits = async (productId: number, accessToken: string) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/available`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/available`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },
@@ -39,7 +40,7 @@ const fetchAvailableUnits = async (productId: number, accessToken: string) => {
 };
 
 const assignUnit = async (productId: number, unitId: number, factor: number, accessToken: string) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/assign`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/assign`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ const assignUnit = async (productId: number, unitId: number, factor: number, acc
 };
 
 const removeUnit = async (productId: number, unitId: number, accessToken: string) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/unit/${unitId}`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/unit/${unitId}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -62,7 +63,7 @@ const removeUnit = async (productId: number, unitId: number, accessToken: string
 };
 
 const updateFactor = async (productId: number, unitId: number, factor: number, accessToken: string) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/unit/${unitId}/factor`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/unit/${unitId}/factor`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

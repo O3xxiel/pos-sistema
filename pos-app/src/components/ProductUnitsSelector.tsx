@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { API_URL } from '../data/api';
 
 // Tipos
 interface Unit {
@@ -27,7 +28,7 @@ interface ProductUnitsSelectorProps {
 
 // API functions
 const fetchAvailableUnits = async (productId: number) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/available`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/available`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
     },
@@ -37,7 +38,7 @@ const fetchAvailableUnits = async (productId: number) => {
 };
 
 const assignUnit = async (productId: number, unitId: number, factor: number) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/assign`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/assign`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -50,7 +51,7 @@ const assignUnit = async (productId: number, unitId: number, factor: number) => 
 };
 
 const removeUnit = async (productId: number, unitId: number) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/unit/${unitId}`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/unit/${unitId}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -60,7 +61,7 @@ const removeUnit = async (productId: number, unitId: number) => {
 };
 
 const updateFactor = async (productId: number, unitId: number, factor: number) => {
-  const response = await fetch(`/api/catalog/units-management/product/${productId}/unit/${unitId}/factor`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/product/${productId}/unit/${unitId}/factor`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
