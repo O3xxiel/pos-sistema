@@ -329,20 +329,20 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
                   const currentUnit = selectedProduct.units.find(u => u.unitCode === selectedUnit) || 
                                     { unitCode: selectedProduct.unitBase, unitName: 'Unidad', factor: 1 };
                   
-                  // Calcular la nueva cantidad manteniendo la cantidad base equivalente
-                  const currentBaseQuantity = baseQuantity;
-                  const newQuantity = Math.round(currentBaseQuantity / newUnit.factor);
+                  // Calcular la nueva cantidad basada en la nueva unidad
+                  const newQuantity = Math.max(1, quantity); // Mantener la cantidad actual o mínimo 1
+                  const newBaseQuantity = newQuantity * newUnit.factor;
                   
                   console.log('🔄 Cambio de unidad:', {
                     from: `${selectedUnit} (factor: ${currentUnit.factor})`,
                     to: `${newUnitCode} (factor: ${newUnit.factor})`,
                     quantity: `${quantity} → ${newQuantity}`,
-                    baseQuantity: currentBaseQuantity
+                    baseQuantity: `${baseQuantity} → ${newBaseQuantity}`
                   });
                   
                   setSelectedUnit(newUnitCode);
-                  setQuantity(Math.max(1, newQuantity)); // Mínimo 1
-                  setBaseQuantity(currentBaseQuantity); // Mantener la cantidad base
+                  setQuantity(newQuantity);
+                  setBaseQuantity(newBaseQuantity); // Recalcular cantidad base
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
               >
