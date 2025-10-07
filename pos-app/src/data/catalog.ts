@@ -1,4 +1,4 @@
-import { fetchWithAuth } from './api';
+import { fetchWithAuth, API_URL } from './api';
 import { db } from '../offline/db';
 import type { ProductRow, CustomerRow } from '../offline/db';
 
@@ -24,7 +24,7 @@ export async function syncProducts() {
   while (true) {
     const qs = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (since) qs.set('updated_since', since);
-    const data: Page<ProductRow> = await fetchWithAuth(`/catalog/products?${qs.toString()}`);
+    const data: Page<ProductRow> = await fetchWithAuth(`${API_URL}/catalog/products?${qs.toString()}`);
 
     if (data.items.length) {
       const rows = data.items.map(p => {
@@ -83,7 +83,7 @@ export async function syncCustomers() {
     if (since) qs.set('updated_since', since);
     
     console.log(`📡 Solicitando página ${page} de clientes...`);
-    const data: Page<CustomerRow> = await fetchWithAuth(`/catalog/customers?${qs.toString()}`);
+    const data: Page<CustomerRow> = await fetchWithAuth(`${API_URL}/catalog/customers?${qs.toString()}`);
     console.log(`📊 Página ${page}: ${data.items.length} clientes recibidos`);
 
     if (data.items.length) {
@@ -126,7 +126,7 @@ export async function createProduct(productData: Omit<ProductRow, 'id' | 'update
 }
 
 export async function updateProduct(id: number, productData: Partial<ProductRow> & { initialStock?: number }) {
-  return await fetchWithAuth(`/catalog/products/${id}`, {
+  return await fetchWithAuth(`${API_URL}/catalog/products/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -136,14 +136,14 @@ export async function updateProduct(id: number, productData: Partial<ProductRow>
 }
 
 export async function deleteProduct(id: number) {
-  return await fetchWithAuth(`/catalog/products/${id}`, {
+  return await fetchWithAuth(`${API_URL}/catalog/products/${id}`, {
     method: 'DELETE',
   });
 }
 
 // Funciones para crear/actualizar clientes
 export async function createCustomer(customerData: Omit<CustomerRow, 'id' | 'updatedAt'>) {
-  return await fetchWithAuth('/catalog/customers', {
+  return await fetchWithAuth(`${API_URL}/catalog/customers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export async function createCustomer(customerData: Omit<CustomerRow, 'id' | 'upd
 }
 
 export async function updateCustomer(id: number, customerData: Partial<CustomerRow>) {
-  return await fetchWithAuth(`/catalog/customers/${id}`, {
+  return await fetchWithAuth(`${API_URL}/catalog/customers/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ export async function updateCustomer(id: number, customerData: Partial<CustomerR
 }
 
 export async function deleteCustomer(id: number) {
-  return await fetchWithAuth(`/catalog/customers/${id}`, {
+  return await fetchWithAuth(`${API_URL}/catalog/customers/${id}`, {
     method: 'DELETE',
   });
 }
@@ -171,7 +171,7 @@ export async function deleteCustomer(id: number) {
 export async function getStock(warehouseId: number = 1) {
   console.log('📦 Solicitando stock para warehouse:', warehouseId);
   try {
-    const result = await fetchWithAuth(`/catalog/stock?warehouseId=${warehouseId}`, {
+    const result = await fetchWithAuth(`${API_URL}/catalog/stock?warehouseId=${warehouseId}`, {
       method: 'GET',
     });
     console.log('📦 Stock recibido:', result);
@@ -201,7 +201,7 @@ export async function confirmSale(saleData: {
   grandTotal: number;
   uuid?: string;
 }) {
-  return await fetchWithAuth(`/sales/confirm`, {
+  return await fetchWithAuth(`${API_URL}/sales/confirm`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ export async function confirmSale(saleData: {
 // ==================== UNIDADES DE MEDIDA ====================
 
 export async function getProductUnits(productId: number) {
-  return fetchWithAuth(`/catalog/units/product/${productId}`);
+  return fetchWithAuth(`${API_URL}/catalog/units/product/${productId}`);
 }
 
 export async function createProductUnit(productId: number, unitData: {
@@ -221,7 +221,7 @@ export async function createProductUnit(productId: number, unitData: {
   unitName: string;
   factor: number;
 }) {
-  return fetchWithAuth(`/catalog/units/product/${productId}`, {
+  return fetchWithAuth(`${API_URL}/catalog/units/product/${productId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(unitData),
@@ -234,7 +234,7 @@ export async function updateProductUnit(unitId: number, unitData: {
   factor?: number;
   isActive?: boolean;
 }) {
-  return fetchWithAuth(`/catalog/units/${unitId}`, {
+  return fetchWithAuth(`${API_URL}/catalog/units/${unitId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(unitData),
@@ -242,17 +242,17 @@ export async function updateProductUnit(unitId: number, unitData: {
 }
 
 export async function deleteProductUnit(unitId: number) {
-  return fetchWithAuth(`/catalog/units/${unitId}`, {
+  return fetchWithAuth(`${API_URL}/catalog/units/${unitId}`, {
     method: 'DELETE',
   });
 }
 
 export async function getStandardUnits() {
-  return fetchWithAuth(`/catalog/units/standard`);
+  return fetchWithAuth(`${API_URL}/catalog/units/standard`);
 }
 
 export async function initializeStandardUnits(productId: number) {
-  return fetchWithAuth(`/catalog/units/product/${productId}/initialize`, {
+  return fetchWithAuth(`${API_URL}/catalog/units/product/${productId}/initialize`, {
     method: 'POST',
   });
 }
