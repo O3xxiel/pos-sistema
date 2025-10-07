@@ -3,6 +3,25 @@ import { useQuery } from '@tanstack/react-query';
 import { getSalesSummary, getTopSellingProducts, getSalesBySeller } from '../data/api';
 import { getCurrentDateGT, formatDisplayDate } from '../utils/dateUtils';
 
+interface TopProduct {
+  productId: number;
+  productName: string;
+  sku: string;
+  totalQuantity: number;
+  totalRevenue: number;
+  unitCode: string;
+}
+
+interface SalesBySeller {
+  sellerId: number;
+  sellerName: string;
+  username: string;
+  totalSales: number;
+  totalRevenue: number;
+  totalQuantity: number;
+  salesCount: number;
+}
+
 export default function SalesReportsPage() {
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
@@ -162,7 +181,7 @@ export default function SalesReportsPage() {
               <div className="p-6">
                 {topProducts && topProducts.length > 0 ? (
                   <div className="space-y-4">
-                    {topProducts.map((product: any, index: number) => (
+                    {topProducts.map((product: TopProduct, index: number) => (
                       <div key={product.productId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
@@ -201,7 +220,7 @@ export default function SalesReportsPage() {
               <div className="p-6">
                 {salesBySeller && salesBySeller.length > 0 ? (
                   <div className="space-y-4">
-                    {salesBySeller.map((seller: any, index: number) => (
+                    {salesBySeller.map((seller: SalesBySeller, index: number) => (
                       <div key={seller.sellerId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
@@ -236,6 +255,7 @@ export default function SalesReportsPage() {
     </div>
   );
 }
+
 
 
 
