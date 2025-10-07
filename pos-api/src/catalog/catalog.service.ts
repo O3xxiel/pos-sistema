@@ -128,12 +128,12 @@ export class CatalogService {
         priceBase: dto.priceBase,
         taxRate: dto.taxRate,
         isActive: dto.isActive ?? true,
-        units: {
+        units: dto.units && dto.units.length > 0 ? {
           create: dto.units.map((unit) => ({
             unitId: unit.unitId,
             factor: unit.factor,
           })),
-        },
+        } : undefined,
       },
       include: {
         units: {

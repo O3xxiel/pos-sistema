@@ -212,6 +212,7 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
             console.warn('⚠️ No hay unidades disponibles, creando producto sin unidades');
           }
           
+          console.log('🚀 Frontend - Sending createData to backend:', JSON.stringify(createData, null, 2));
           const backendProduct = await createProduct(createData);
           savedProduct = backendProduct;
           await db.catalog_products.put(savedProduct);

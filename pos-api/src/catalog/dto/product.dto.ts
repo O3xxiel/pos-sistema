@@ -49,10 +49,11 @@ export class CreateProductDto {
   @Min(0)
   initialStock?: number;
 
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProductUnitDto)
-  units: ProductUnitDto[];
+  units?: ProductUnitDto[];
 }
 
 export class UpdateProductDto {
