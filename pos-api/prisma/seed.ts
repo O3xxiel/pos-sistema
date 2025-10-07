@@ -68,10 +68,25 @@ async function main() {
     create: { userId: seller.id, roleId: sellerRole.id },
   });
 
+  // 6) Crear unidades básicas (idempotente)
+  await prisma.unit.createMany({
+    data: [
+      { code: 'UND', name: 'Unidad', symbol: 'und', isActive: true },
+      { code: 'DOC', name: 'Docena', symbol: 'doc', isActive: true },
+      { code: 'CAJ', name: 'Caja', symbol: 'caj', isActive: true },
+      { code: 'KG', name: 'Kilogramo', symbol: 'kg', isActive: true },
+      { code: 'GR', name: 'Gramo', symbol: 'gr', isActive: true },
+      { code: 'LT', name: 'Litro', symbol: 'lt', isActive: true },
+      { code: 'ML', name: 'Mililitro', symbol: 'ml', isActive: true },
+    ],
+    skipDuplicates: true,
+  });
+
   console.log('✅ Seed done:', {
     admin: admin.username,
     seller: seller.username,
     roles: [adminRole.code, sellerRole.code],
+    units: 'Created basic units (UND, DOC, CAJ, KG, GR, LT, ML)',
   });
 }
 

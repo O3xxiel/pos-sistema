@@ -21,7 +21,7 @@ interface DynamicUnit {
 }
 
 // const UNIT_OPTIONS: { code: UnitCode; name: string }[] = [
-//   { code: 'UND', name: 'Unidad' },
+//   { code: 'UNIDAD', name: 'Unidad' },
 //   { code: 'DOC', name: 'Docena' },
 //   { code: 'CAJ', name: 'Caja' }
 // ];
@@ -32,12 +32,12 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
     sku: '',
     name: '',
     barcode: '',
-    unitBase: 'UND' as UnitCode,
+    unitBase: 'UNIDAD' as UnitCode,
     priceBase: 0,
     taxRate: 0,
     isActive: true,
     initialStock: 0,
-    units: [{ unitCode: 'UND' as UnitCode, factor: 1 }] as ProductUnit[]
+    units: [{ unitCode: 'UNIDAD' as UnitCode, factor: 1 }] as ProductUnit[]
   });
   const [dynamicUnits, setDynamicUnits] = useState<DynamicUnit[]>([]);
   const [newUnit, setNewUnit] = useState({ unitCode: '', unitName: '', factor: 1 });
@@ -150,7 +150,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
         sku: formData.sku.trim(),
         name: formData.name.trim(),
         barcode: formData.barcode.trim() || null,
-        unitBase: 'UND' as UnitCode, // Siempre UND
+        unitBase: 'UNIDAD' as UnitCode, // Siempre UND
         priceBase: formData.priceBase,
         taxRate: formData.taxRate,
         isActive: formData.isActive,
@@ -238,7 +238,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   // const addUnit = () => {
   //   setFormData(prev => ({
   //     ...prev,
-  //     units: [...prev.units, { unitCode: 'UND', factor: 1 }]
+  //     units: [...prev.units, { unitCode: 'UNIDAD', factor: 1 }]
   //   }));
   // };
 
@@ -313,7 +313,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
     } else {
       // Para productos nuevos, agregar unidades estándar a la lista local
       const standardUnits = [
-        { id: Date.now(), unitCode: 'UND', unitName: 'Unidad', factor: 1 },
+        { id: Date.now(), unitCode: 'UNIDAD', unitName: 'Unidad', factor: 1 },
         { id: Date.now() + 1, unitCode: 'DOC', unitName: 'Docena', factor: 12 },
         { id: Date.now() + 2, unitCode: 'CAJ', unitName: 'Caja', factor: 1 },
       ];

@@ -30,7 +30,7 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
     sku: '',
     name: '',
     barcode: '',
-    unitBase: 'UND' as string,
+    unitBase: 'UNIDAD' as string,
     priceBase: 0,
     taxRate: 0,
     isActive: true,
@@ -126,12 +126,12 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
         sku: formData.sku.trim(),
         name: formData.name.trim(),
         barcode: formData.barcode.trim() || null,
-        unitBase: 'UND' as UnitCode, // Siempre UND
+        unitBase: 'UNIDAD' as UnitCode, // Siempre UNIDAD
         priceBase: formData.priceBase,
         taxRate: formData.taxRate,
         isActive: formData.isActive,
         updatedAt: new Date().toISOString(),
-        units: [{ unitCode: 'UND' as UnitCode, factor: 1 }] as ProductUnit[]
+        units: [{ unitCode: 'UNIDAD' as UnitCode, factor: 1 }] as ProductUnit[]
       };
 
       let savedProduct: ProductRow;

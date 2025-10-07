@@ -17,7 +17,7 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
   const [products, setProducts] = useState<ProductForSale[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<ProductForSale | null>(null);
-  const [selectedUnit, setSelectedUnit] = useState<UnitCode>('UND');
+  const [selectedUnit, setSelectedUnit] = useState<UnitCode>('UNIDAD');
   const [quantity, setQuantity] = useState<number>(1);
   const [baseQuantity, setBaseQuantity] = useState<number>(1); // Cantidad en unidades base
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -46,7 +46,7 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
       setSearchQuery('');
       setProducts([]);
       setSelectedProduct(null);
-      setSelectedUnit('UND');
+      setSelectedUnit('UNIDAD');
       setQuantity(1);
       setBaseQuantity(1);
       setIsSearchOpen(false);
@@ -156,7 +156,7 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
       
       // Reset solo el producto seleccionado, mantener la búsqueda activa
       setSelectedProduct(null);
-      setSelectedUnit('UND');
+      setSelectedUnit('UNIDAD');
       setQuantity(1);
       setBaseQuantity(1);
       
