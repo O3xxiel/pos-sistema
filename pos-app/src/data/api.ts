@@ -1,6 +1,9 @@
 // pos-app/src/data/api.ts
-export const API_URL =
-  (import.meta.env.VITE_API_URL as string) || 'http://localhost:3001';
+export const API_URL = 
+  import.meta.env.VITE_API_URL || 
+  (import.meta.env.MODE === 'production' 
+    ? 'https://pos-api-jn9b.onrender.com' 
+    : 'http://localhost:3001');
 
 export type AuthUser = { id: number; username: string; fullName?: string; roles: string[] };
 export type LoginResponse = { access_token: string; refresh_token: string; user: AuthUser };
