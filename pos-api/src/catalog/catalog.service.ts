@@ -147,6 +147,11 @@ export class CatalogService {
     // Crear registro de stock inicial en el almacén principal (ID 1)
     try {
       const stockQty = dto.initialStock || 0;
+      console.log('📦 [SERVICE] Creating initial stock:', {
+        productId: product.id,
+        stockQty,
+        warehouseId: 1
+      });
 
       await this.prisma.stock.create({
         data: {

@@ -213,6 +213,7 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
           }
           
           console.log('🚀 Frontend - Sending createData to backend:', JSON.stringify(createData, null, 2));
+          console.log('📦 Frontend - initialStock value:', formData.initialStock);
           const backendProduct = await createProduct(createData);
           savedProduct = backendProduct;
           await db.catalog_products.put(savedProduct);
