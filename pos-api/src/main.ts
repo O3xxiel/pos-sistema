@@ -5,14 +5,28 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configuración CORS más flexible para Vercel
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:5173',
+    'http://localhost:3001',
+  ];
+
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
-      'http://localhost:5173',
-      'http://localhost:3001',
-      'https://pos-sistema-c4cy8x16h-oscars-projects-549aeb9c.vercel.app',
-      'https://pos-sistema-l6ifc23c9-oscars-projects-549aeb9c.vercel.app',
-      'https://pos-sistema-2fjeb327u-oscars-projects-549aeb9c.vercel.app',
-    ],
+    origin: (origin, callback) => {
+      // Permitir requests sin origin (mobile apps, etc.)
+      if (!origin) return callback(null, true);
+      
+      // Permitir localhost
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      
+      // Permitir cualquier subdominio de vercel.app
+      if (origin.includes('.vercel.app')) return callback(null, true);
+      
+      // Permitir cualquier subdominio de oscars-projects-549aeb9c.vercel.app
+      if (origin.includes('oscars-projects-549aeb9c.vercel.app')) return callback(null, true);
+      
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
