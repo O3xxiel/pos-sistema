@@ -74,8 +74,8 @@ async function main() {
     update: {},
     create: {
       id: 1,
+      code: 'MAIN',
       name: 'Almacén Principal',
-      location: 'Surtidora Katy',
       isActive: true,
     },
   });
