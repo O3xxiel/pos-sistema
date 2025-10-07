@@ -1,8 +1,22 @@
 import { useEffect, useState } from 'react';
 import { getStock } from '../data/catalog';
 
+interface StockItem {
+  id: number;
+  productId: number;
+  qty: number;
+  unitCode: string;
+  warehouseId: number;
+  product?: {
+    id: number;
+    name: string;
+    sku: string;
+    priceBase: number;
+  };
+}
+
 export default function TestStock() {
-  const [stock, setStock] = useState<any[]>([]);
+  const [stock, setStock] = useState<StockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,6 +109,7 @@ export default function TestStock() {
     </div>
   );
 }
+
 
 
 
