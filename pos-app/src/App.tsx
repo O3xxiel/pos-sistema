@@ -161,16 +161,16 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/*" element={
             <div className="flex h-screen bg-gray-50">
-              {/* Navegación lateral */}
+              {/* Navegación lateral - Solo en desktop */}
               <Navigation />
               
               {/* Contenido principal */}
-              <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
                 {/* Barra de sincronización */}
                 <SyncBar />
                 
                 {/* Área de contenido */}
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-auto p-4 lg:p-6">
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/catalog/products" element={<ProductsPage />} />
@@ -182,14 +182,14 @@ export default function App() {
                     <Route path="/admin/offline-sales" element={<AdminOfflineSalesPage />} />
                     <Route path="/admin/drafts" element={<AdminDraftsPage />} />
                     <Route path="/admin/conflicts" element={<ConflictReviewPage />} />
-        <Route path="/sellers" element={<SellersPage />} />
-        <Route path="/reports" element={<UnifiedReportsPage />} />
-        <Route path="/reports/daily" element={<DailyReportPage />} />
-        <Route path="/reports/summary" element={<DailySummaryPage />} />
-        <Route path="/reports/sales" element={<SalesReportsPage />} />
-        <Route path="/reports/inventory" element={<InventoryReportsPage />} />
-        <Route path="/reports/customers" element={<CustomerReportsPage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
+                    <Route path="/sellers" element={<SellersPage />} />
+                    <Route path="/reports" element={<UnifiedReportsPage />} />
+                    <Route path="/reports/daily" element={<DailyReportPage />} />
+                    <Route path="/reports/summary" element={<DailySummaryPage />} />
+                    <Route path="/reports/sales" element={<SalesReportsPage />} />
+                    <Route path="/reports/inventory" element={<InventoryReportsPage />} />
+                    <Route path="/reports/customers" element={<CustomerReportsPage />} />
+                    <Route path="/inventory" element={<InventoryPage />} />
                     <Route path="/test/stock" element={<TestStockPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>

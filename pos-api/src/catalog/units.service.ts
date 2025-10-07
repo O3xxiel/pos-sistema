@@ -147,4 +147,12 @@ export class UnitsService {
 
     return createdUnits;
   }
+
+  // Obtener todas las unidades disponibles
+  async getAllUnits() {
+    return this.prisma.unit.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    });
+  }
 }

@@ -14,8 +14,7 @@ import { Roles } from '../auth/roles.decorator';
 import { UnitsService } from './units.service';
 
 @Controller('catalog/units')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ADMIN')
+@UseGuards(JwtAuthGuard)
 export class UnitsController {
   constructor(private readonly unitsService: UnitsService) {}
 
@@ -56,6 +55,11 @@ export class UnitsController {
   @Get('standard')
   async getStandardUnits() {
     return this.unitsService.getStandardUnits();
+  }
+
+  @Get('all')
+  async getAllUnits() {
+    return this.unitsService.getAllUnits();
   }
 
   @Post('product/:productId/initialize')

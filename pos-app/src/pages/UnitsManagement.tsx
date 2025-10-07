@@ -16,7 +16,7 @@ interface Unit {
 
 // API functions
 const fetchUnits = async (accessToken: string): Promise<Unit[]> => {
-  const response = await fetch('/api/catalog/units-management', {
+  const response = await fetch('/api/catalog/units/all', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },

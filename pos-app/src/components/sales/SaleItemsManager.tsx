@@ -80,8 +80,8 @@ export default function SaleItemsManager({ items, onUpdateItem, onRemoveItem }: 
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {/* Header */}
-        <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+        {/* Header - Solo visible en desktop */}
+        <div className="hidden lg:block bg-gray-50 px-6 py-3 border-b border-gray-200">
           <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">
             <div className="col-span-4">Producto</div>
             <div className="col-span-2">Unidad</div>
@@ -95,8 +95,105 @@ export default function SaleItemsManager({ items, onUpdateItem, onRemoveItem }: 
         {/* Items */}
         <div className="divide-y divide-gray-100">
           {items.map((item) => (
-            <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
-              <div className="grid grid-cols-12 gap-4 items-center">
+            <div key={item.id} className="p-4 lg:p-6 hover:bg-gray-50 transition-colors">
+              {/* Vista móvil */}
+              <div className="lg:hidden space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center flex-1 min-w-0">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-sm flex-shrink-0">
+                      <span className="text-white font-bold text-xs">
+                        {item.productName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-gray-900 truncate">{item.productName}</p>
+                      <p className="text-sm text-gray-500">SKU: {item.productSku}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onRemoveItem(item.id)}
+                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Unidad</label>
+                    {editingItem === item.id ? (
+                      <select
+                        value={item.unitCode}
+                        onChange={(e) => handleUnitChange(item.id, e.target.value as UnitCode)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        onBlur={stopEditing}
+                        autoFocus
+                      >
+                        {item.availableUnits.map((unit) => (
+                          <option key={unit.unitCode} value={unit.unitCode}>
+                            {unit.unitName || unit.unitCode} {unit.factor > 1 && `(${unit.factor})`}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <button
+                        onClick={() => startEditing(item.id)}
+                        className="w-full px-3 py-2 text-sm font-medium text-gray-900 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors text-left"
+                      >
+                        {item.availableUnits.find(u => u.unitCode === item.unitCode)?.unitName || item.unitCode}
+                        {item.unitFactor > 1 && <span className="text-gray-500 ml-1">({item.unitFactor})</span>}
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Cantidad</label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={item.qty}
+                      onChange={(e) => handleQuantityChange(item.id, parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Precio Unit.</label>
+                    <div className="px-3 py-2 bg-gray-50 rounded-lg text-sm font-medium text-gray-900">
+                      {formatPrice(item.priceUnit)}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Descuento</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.discount}
+                      onChange={(e) => handleDiscountChange(item.id, parseFloat(e.target.value) || 0)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-500">Subtotal:</span>
+                    <span className="text-lg font-bold text-gray-900">
+                      {formatPrice((item.priceUnit * item.qty) - item.discount)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Vista desktop */}
+              <div className="hidden lg:grid grid-cols-12 gap-4 items-center">
                 {/* Producto */}
                 <div className="col-span-4">
                   <div className="flex items-center">

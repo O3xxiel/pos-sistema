@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../state/auth';
 import { usePermissions } from '../hooks/usePermissions';
 import Logo from './Logo';
@@ -53,57 +54,37 @@ const getNavigationItems = (permissions: ReturnType<typeof usePermissions>) => [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
     ),
-    show: permissions.canManageSales(), // Solo vendedores
+    show: true, // Siempre visible
   },
   {
-    name: 'Mis Borradores',
+    name: 'Borradores',
     href: '/sales/drafts',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     ),
-    show: permissions.canManageSales(), // Solo vendedores
+    show: true, // Siempre visible
   },
   {
     name: 'Ventas Offline',
     href: '/sales/offline',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
       </svg>
     ),
-    show: permissions.canManageSales(), // Solo vendedores
+    show: true, // Siempre visible
   },
   {
-    name: 'Admin Ventas Offline',
-    href: '/admin/offline-sales',
+    name: 'Inventario',
+    href: '/inventory',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
       </svg>
     ),
-    show: permissions.isAdmin(), // Solo administradores
-  },
-  {
-    name: 'Todos los Borradores',
-    href: '/admin/drafts',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-    show: permissions.canViewDrafts(), // Administradores y vendedores
-  },
-  {
-    name: 'Revisión de Conflictos',
-    href: '/admin/conflicts',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-      </svg>
-    ),
-    show: permissions.isAdmin(), // Solo administradores
+    show: permissions.canManageProducts(), // Solo administradores
   },
   {
     name: 'Vendedores',
@@ -113,17 +94,7 @@ const getNavigationItems = (permissions: ReturnType<typeof usePermissions>) => [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
       </svg>
     ),
-    show: permissions.isAdmin(), // Solo administradores
-  },
-  {
-    name: 'Inventario',
-    href: '/inventory',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-      </svg>
-    ),
-    show: permissions.canManageProducts(), // Solo administradores
+    show: permissions.canManageSellers(), // Solo administradores
   },
   {
     name: 'Reportes',
@@ -133,83 +104,181 @@ const getNavigationItems = (permissions: ReturnType<typeof usePermissions>) => [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
     ),
-    show: permissions.canViewReports(), // Administradores y vendedores
+    show: permissions.canViewReports(), // Solo administradores
   },
 ];
 
 export default function Navigation() {
-  const location = useLocation();
   const { user, logout } = useAuth();
   const permissions = usePermissions();
-  const navigation = getNavigationItems(permissions);
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  const navigationItems = getNavigationItems(permissions);
+  
+  if (!user) return null;
 
   return (
-    <nav className="bg-white shadow-sm border-r border-gray-200 w-64 min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <Logo size="md" />
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">Surtidora Katy</h1>
-            <p className="text-xs text-gray-500 mt-1">Sistema POS</p>
+    <>
+      {/* Mobile Header */}
+      <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <Logo />
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <Logo />
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Mobile Navigation Items */}
+            <div className="flex-1 overflow-y-auto py-4">
+              <div className="px-3 space-y-1">
+                {navigationItems
+                  .filter(item => item.show)
+                  .map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`${
+                          isActive
+                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        } group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-200`}
+                      >
+                        <span className={`mr-3 ${isActive ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-500'}`}>
+                          {item.icon}
+                        </span>
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+              </div>
+            </div>
+            
+            {/* Mobile User Info & Logout */}
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center mb-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-white">
+                      {user.fullName?.charAt(0) || user.username.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <div className="ml-3 min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {user.fullName || user.username}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user.roles?.join(', ') || 'Usuario'}
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  logout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center px-3 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Cerrar Sesión
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Navigation Links */}
-      <div className="flex-1 px-4 py-6">
-        <nav className="space-y-2">
-          {navigation
-            .filter(item => item.show) // Solo mostrar elementos permitidos
-            .map((item) => {
-            const isActive = location.pathname === item.href;
-            
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                {item.icon}
-                <span className="ml-3">{item.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* User Info & Logout */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {user?.fullName || user?.username}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {user?.roles.join(', ')}
-            </p>
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:flex bg-white shadow-sm border-r border-gray-200 w-64 min-h-screen flex-col">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200">
+          <Logo />
+        </div>
+        
+        {/* Navigation Items */}
+        <div className="flex-1 overflow-y-auto py-4">
+          <div className="px-3 space-y-1">
+            {navigationItems
+              .filter(item => item.show)
+              .map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`${
+                      isActive
+                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    } group flex items-center px-3 py-2 text-sm font-medium rounded-l-lg transition-colors duration-200`}
+                  >
+                    <span className={`mr-3 ${isActive ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-500'}`}>
+                      {item.icon}
+                    </span>
+                    {item.name}
+                  </Link>
+                );
+              })}
           </div>
         </div>
         
-        <button
-          onClick={logout}
-          className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Cerrar Sesión
-        </button>
-      </div>
-    </nav>
+        {/* User Info & Logout */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center mb-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {user.fullName?.charAt(0) || user.username.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            </div>
+            <div className="ml-3 min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user.fullName || user.username}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {user.roles?.join(', ') || 'Usuario'}
+              </p>
+            </div>
+          </div>
+          
+          <button
+            onClick={logout}
+            className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Cerrar Sesión
+          </button>
+        </div>
+      </nav>
+    </>
   );
 }

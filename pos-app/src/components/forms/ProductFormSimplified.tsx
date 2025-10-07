@@ -14,7 +14,7 @@ interface ProductFormProps {
 
 // API function para obtener unidades disponibles
 const fetchUnits = async (accessToken: string) => {
-  const response = await fetch('/api/catalog/units-management', {
+  const response = await fetch('/api/catalog/units/all', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },

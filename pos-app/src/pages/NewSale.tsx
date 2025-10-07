@@ -300,13 +300,13 @@ export default function NewSalePage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 lg:mb-6">
+        <div className="flex items-center space-x-2 lg:space-x-4">
           <button
             onClick={handleGoBack}
-            className="btn-outline p-2"
+            className="btn-outline p-2 lg:p-2"
             title="Volver"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,16 +314,16 @@ export default function NewSalePage() {
             </svg>
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {saleId ? 'Editar Venta - Surtidora Katy' : 'Nueva Venta - Surtidora Katy'}
+            <h1 className="text-lg lg:text-2xl font-bold text-gray-900">
+              {saleId ? 'Editar Venta' : 'Nueva Venta'}
             </h1>
-            <p className="text-gray-600">
-              {saleId ? `Editando borrador ${saleId.slice(0, 8)}...` : 'Crear un nuevo borrador de venta'}
+            <p className="text-sm lg:text-base text-gray-600">
+              {saleId ? `Borrador ${saleId.slice(0, 8)}...` : 'Crear nuevo borrador'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mt-4 lg:mt-0">
           {lastSaved && (
             <span className="text-sm text-gray-500">
               Guardado: {lastSaved}
@@ -333,7 +333,7 @@ export default function NewSalePage() {
           <button
             onClick={() => handleSave(true)}
             disabled={!canSave || saving || confirming}
-            className="btn-secondary"
+            className="btn-secondary min-h-[44px] text-sm lg:text-base"
           >
             {saving ? (
               <>
@@ -356,7 +356,7 @@ export default function NewSalePage() {
           <button
             onClick={handleForceSync}
             disabled={syncing || saving || confirming}
-            className={`px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all duration-200 flex items-center ${
+            className={`px-3 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium shadow-md transition-all duration-200 flex items-center min-h-[44px] ${
               syncing
                 ? 'bg-gray-400 text-white cursor-not-allowed'
                 : 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg'
@@ -384,7 +384,7 @@ export default function NewSalePage() {
           <button
             onClick={handleConfirmSale}
             disabled={!canSave || saving || confirming}
-            className="btn-primary"
+            className="btn-primary min-h-[44px] text-sm lg:text-base"
           >
             {confirming ? (
               <>
@@ -406,9 +406,9 @@ export default function NewSalePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Left Column - Customer and Product Selection */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 lg:space-y-6">
           {/* Customer Selection */}
           <div className="card">
             <CustomerSelector
@@ -438,7 +438,7 @@ export default function NewSalePage() {
 
         {/* Right Column - Totals and Summary */}
         <div className="lg:col-span-1">
-          <div className="sticky top-20">
+          <div className="lg:sticky lg:top-20">
             <SaleTotals
               sale={currentSale}
               onNotesChange={handleNotesChange}
