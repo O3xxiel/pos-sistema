@@ -534,4 +534,16 @@ export class CatalogService {
       message: `Se agregaron ${quantity} unidades de ${product.name}. Stock total: ${stockResult.qty}`,
     };
   }
+
+  async checkWarehouse(warehouseId: number) {
+    try {
+      const warehouse = await this.prisma.warehouse.findUnique({
+        where: { id: warehouseId },
+      });
+      return !!warehouse;
+    } catch (error) {
+      console.error('❌ [SERVICE] Error checking warehouse:', error);
+      return false;
+    }
+  }
 }

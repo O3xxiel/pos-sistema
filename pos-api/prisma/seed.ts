@@ -68,7 +68,19 @@ async function main() {
     create: { userId: seller.id, roleId: sellerRole.id },
   });
 
-  // 6) Crear unidades básicas (idempotente)
+  // 6) Crear almacén principal (idempotente)
+  await prisma.warehouse.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      name: 'Almacén Principal',
+      location: 'Surtidora Katy',
+      isActive: true,
+    },
+  });
+
+  // 7) Crear unidades básicas (idempotente)
   await prisma.unit.createMany({
     data: [
       { code: 'UND', name: 'Unidad', symbol: 'und', isActive: true },
@@ -86,6 +98,7 @@ async function main() {
     admin: admin.username,
     seller: seller.username,
     roles: [adminRole.code, sellerRole.code],
+    warehouse: 'Created main warehouse (ID: 1)',
     units: 'Created basic units (UND, DOC, CAJ, KG, GR, LT, ML)',
   });
 }

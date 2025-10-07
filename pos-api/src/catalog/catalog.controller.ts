@@ -64,10 +64,15 @@ export class CatalogController {
       const stock = await this.service.getStock(1);
       console.log('📊 Stock records found:', stock.length);
 
+      // Verificar si el almacén existe
+      const warehouse = await this.service.checkWarehouse(1);
+      console.log('🏪 Warehouse 1 exists:', warehouse);
+
       return {
         message: 'Test completed successfully',
         productsCount: products.items.length,
         stockCount: stock.length,
+        warehouseExists: warehouse,
         user: req.user,
       };
     } catch (error) {
