@@ -116,7 +116,10 @@ export class CatalogService {
   }
 
   async createProduct(dto: CreateProductDto) {
-    const product = await this.prisma.product.create({
+    console.log('🛍️ [SERVICE] createProduct called with DTO:', JSON.stringify(dto, null, 2));
+    
+    try {
+      const product = await this.prisma.product.create({
       data: {
         sku: dto.sku,
         name: dto.name,
@@ -181,6 +184,10 @@ export class CatalogService {
         factor: u.factor,
       })),
     };
+    } catch (error) {
+      console.error('❌ [SERVICE] Error creating product:', error);
+      throw error;
+    }
   }
 
   async updateProduct(id: number, dto: UpdateProductDto) {

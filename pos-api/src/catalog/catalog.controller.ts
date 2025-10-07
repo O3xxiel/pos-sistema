@@ -101,7 +101,9 @@ export class CatalogController {
   // ========== GESTIÓN DE PRODUCTOS (Solo ADMIN) ==========
   @Post('products')
   @Roles('ADMIN')
-  createProduct(@Body() dto: CreateProductDto) {
+  createProduct(@Body() dto: CreateProductDto, @Req() req: any) {
+    console.log('🛍️ [CONTROLLER] createProduct called by user:', req.user?.username);
+    console.log('🛍️ [CONTROLLER] DTO received:', JSON.stringify(dto, null, 2));
     return this.service.createProduct(dto);
   }
 
