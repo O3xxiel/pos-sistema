@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../state/auth';
+import { useState, useEffect } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
 import { 
   getSalesSummary, 
   getTopSellingProducts, 
   getSalesBySeller,
   getInventorySummary,
-  getInventoryMovements,
   getCustomerSummary,
   getTopCustomers,
   getCustomerActivity
@@ -69,14 +67,13 @@ export default function ReportsPage() {
           salesBySeller,
         });
       } else if (activeTab === 'inventory') {
-        const [inventorySummary, movements] = await Promise.all([
+        const [inventorySummary] = await Promise.all([
           getInventorySummary(),
-          getInventoryMovements(startDate, endDate, 20),
         ]);
         
         setData({
           inventorySummary,
-          movements,
+          movements: [],
         });
       } else if (activeTab === 'customers') {
         const [customerSummary, topCustomers, customerActivity] = await Promise.all([
@@ -243,7 +240,7 @@ function SalesReports({ data, formatCurrency }: { data: any; formatCurrency: (am
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {topProducts?.map((product: any, index: number) => (
+              {topProducts?.map((product: any) => (
                 <tr key={product.productId}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {product.productName}

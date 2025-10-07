@@ -1,8 +1,8 @@
 // pos-app/src/pages/ConflictReview.tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchWithAuth, API_URL } from '../data/api';
-import { useAuth } from '../state/auth';
+// import { useAuth } from '../state/auth';
 import { usePermissions } from '../hooks/usePermissions';
 import ConflictReviewModal from '../components/sales/ConflictReviewModal';
 
@@ -66,7 +66,6 @@ interface ConflictReviewAction {
 }
 
 export default function ConflictReviewPage() {
-  const { user } = useAuth();
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [selectedSale, setSelectedSale] = useState<ConflictSale | null>(null);

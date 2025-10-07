@@ -268,8 +268,8 @@ export default function AdminOfflineSales() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3">
                       <div className="flex-shrink-0">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(sale.status, sale.lastError)}`}>
-                          {getStatusText(sale.status, sale.lastError)}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(sale.status, sale.lastError ?? undefined)}`}>
+                          {getStatusText(sale.status, sale.lastError ?? undefined)}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">

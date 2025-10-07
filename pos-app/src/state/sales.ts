@@ -132,7 +132,8 @@ export const useSales = create<SalesState>((set, get) => ({
           customerName: sale.customer?.name || '',
           customerCode: sale.customer?.nit || '',
           warehouseId: sale.warehouseId || 1,
-          items: sale.items.map(item => ({
+          sellerId: sale.sellerId || 1,
+          items: sale.items.map((item: any) => ({
             id: item.id.toString(),
             productId: item.productId,
             productName: item.product.name,
@@ -298,7 +299,7 @@ export const useSales = create<SalesState>((set, get) => ({
       const response = await getSalesDrafts();
       console.log('📥 loadDrafts - Response from API:', response);
       console.log('📥 loadDrafts - Number of sales found:', response.sales.length);
-      const drafts = response.sales.map(sale => {
+      const drafts = response.sales.map((sale: any) => {
         console.log(`📥 loadDrafts - Mapping sale: API ID=${sale.id}, UUID=${sale.uuid}, Status=${sale.status}`);
         return {
           id: sale.uuid || sale.id.toString(),
@@ -307,17 +308,20 @@ export const useSales = create<SalesState>((set, get) => ({
           customerName: sale.customer?.name || '',
           customerCode: sale.customer?.nit || '',
           warehouseId: sale.warehouseId || 1,
-        items: sale.items.map(item => ({
+        items: sale.items.map((item: any) => ({
           id: item.id.toString(),
           productId: item.productId,
           productName: item.product.name,
           productSku: item.product.sku,
           unitCode: item.unitCode as UnitCode,
+          unitFactor: 1,
           qty: item.qty,
           qtyBase: item.qtyBase,
           priceUnit: item.priceUnit,
           discount: item.discount,
           lineTotal: item.lineTotal,
+          productTaxRate: 0,
+          availableUnits: [],
         })),
         subtotal: sale.subtotal || 0,
         taxTotal: sale.taxTotal || 0,

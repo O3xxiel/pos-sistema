@@ -38,11 +38,13 @@ export default function SellersPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteSeller,
     onSuccess: () => {
-      showToast('Vendedor eliminado exitosamente', 'success');
+      setSuccessMessage('Vendedor eliminado exitosamente');
+      setTimeout(() => setSuccessMessage(null), 5000);
       queryClient.invalidateQueries({ queryKey: ['sellers'] });
     },
     onError: (error: Error) => {
-      showToast(error.message || 'Error al eliminar vendedor', 'error');
+      setSuccessMessage(`Error: ${error.message || 'Error al eliminar vendedor'}`);
+      setTimeout(() => setSuccessMessage(null), 5000);
     },
   });
 
@@ -220,7 +222,7 @@ export default function SellersPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sellers.map((seller) => (
+                {sellers.map((seller: Seller) => (
                   <tr key={seller.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -399,7 +401,7 @@ function SellerModal({ seller, onClose, onSuccess }: {
     
     if (!validateForm()) return;
 
-    const submitData = { ...formData };
+    const submitData: any = { ...formData };
     if (seller && !submitData.password) {
       delete submitData.password; // No enviar contraseña vacía en actualización
     }

@@ -101,7 +101,7 @@ export default function DailyReportPage() {
       setSelectedSellerId('me');
     } else if (permissions.canViewAllReports() && sellersData?.sellers && sellersData.sellers.length > 0) {
       // Para administradores, seleccionar el primer vendedor disponible si no hay uno seleccionado
-      const firstSeller = sellersData.sellers.find(seller => seller.roleCode !== 'ADMIN');
+      const firstSeller = sellersData.sellers.find((seller: any) => seller.roleCode !== 'ADMIN');
       if (firstSeller && selectedSellerId === 'me') {
         setSelectedSellerId(firstSeller.id.toString());
       }
@@ -216,7 +216,7 @@ export default function DailyReportPage() {
         <p className="text-gray-600">
           {selectedSellerId === 'me' 
             ? (report?.seller?.fullName || 'Vendedor') 
-            : (sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor')
+            : (sellersData?.sellers?.find((s: any) => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor')
           } - {formatDisplayDate(selectedDate)}
         </p>
       </div>
@@ -248,8 +248,8 @@ export default function DailyReportPage() {
                 disabled={!permissions.canViewAllReports()}
               >
                 {sellersData.sellers
-                  .filter(seller => seller.roleCode !== 'ADMIN') // Ocultar admins
-                  .map((seller) => (
+                  .filter((seller: any) => seller.roleCode !== 'ADMIN') // Ocultar admins
+                  .map((seller: any) => (
                     <option key={seller.id} value={seller.id.toString()}>
                       {seller.fullName} ({seller.role})
                     </option>
@@ -343,7 +343,7 @@ export default function DailyReportPage() {
             <div className="p-6">
               {report.topProducts && report.topProducts.length > 0 ? (
                 <div className="space-y-4">
-                  {report.topProducts.map((product, index) => (
+                  {report.topProducts.map((product: any, index: number) => (
                     <div key={product.productId} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
                         <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -375,7 +375,7 @@ export default function DailyReportPage() {
             <div className="p-6">
               {report.peakHours && report.peakHours.length > 0 ? (
                 <div className="space-y-4">
-                  {report.peakHours.map((hour, index) => (
+                  {report.peakHours.map((hour: any, index: number) => (
                     <div key={hour.hour} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
                         <span className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -453,7 +453,7 @@ export default function DailyReportPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item, index) => (
+                          {sale.items.map((item: any, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} - {item.qty} {item.unitCode} - Q {item.lineTotal.toFixed(2)}
                             </p>
@@ -477,7 +477,7 @@ export default function DailyReportPage() {
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {report.pendingSales?.sales?.map((sale) => (
+                  {report.pendingSales?.sales?.map((sale: any) => (
                     <div key={sale.id} className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -494,7 +494,7 @@ export default function DailyReportPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item, index) => (
+                          {sale.items.map((item: any, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} - {item.quantity} UND - {formatCurrency(item.total)}
                             </p>
@@ -518,7 +518,7 @@ export default function DailyReportPage() {
             <div className="p-6">
               {report.dailySales && report.dailySales.length > 0 ? (
                 <div className="space-y-4">
-                  {report.dailySales.map((sale) => (
+                  {report.dailySales.map((sale: any) => (
                     <div key={sale.id} className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -539,7 +539,7 @@ export default function DailyReportPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item, index) => (
+                          {sale.items.map((item: any, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} ({item.productSku}) - {item.quantity} UND - {formatCurrency(item.total)}
                             </p>

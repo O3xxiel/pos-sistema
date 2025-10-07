@@ -20,11 +20,11 @@ interface DynamicUnit {
   isActive?: boolean;
 }
 
-const UNIT_OPTIONS: { code: UnitCode; name: string }[] = [
-  { code: 'UND', name: 'Unidad' },
-  { code: 'DOC', name: 'Docena' },
-  { code: 'CAJ', name: 'Caja' }
-];
+// const UNIT_OPTIONS: { code: UnitCode; name: string }[] = [
+//   { code: 'UND', name: 'Unidad' },
+//   { code: 'DOC', name: 'Docena' },
+//   { code: 'CAJ', name: 'Caja' }
+// ];
 
 export default function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
   const queryClient = useQueryClient();
@@ -50,7 +50,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   const { getProductStock, loadStock, syncStock } = useStock();
 
   // Query para obtener unidades dinámicas (solo si es un producto existente)
-  const { data: productUnits, isLoading: unitsLoading } = useQuery<DynamicUnit[]>({
+  const { data: productUnits } = useQuery<DynamicUnit[]>({
     queryKey: ['productUnits', product?.id],
     queryFn: () => product?.id ? getProductUnits(product.id) : Promise.resolve([]),
     enabled: !!product?.id,
@@ -99,7 +99,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
         taxRate: product.taxRate,
         isActive: product.isActive,
         initialStock: currentStock,
-        units: product.units.length > 0 ? product.units : [{ unitCode: product.unitBase, factor: 1 }]
+        units: product.units.length > 0 ? product.units : [{ unitCode: product.unitBase, unitName: 'Unidad', factor: 1 }]
       });
     }
   }, [product]);
@@ -142,7 +142,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       // Verificar que la unidad base esté en las unidades
       const hasBaseUnit = formData.units.some(u => u.unitCode === formData.unitBase);
       if (!hasBaseUnit) {
-        formData.units.unshift({ unitCode: formData.unitBase, factor: 1 });
+        formData.units.unshift({ unitCode: formData.unitBase, unitName: 'Unidad', factor: 1 });
       }
 
       const productData: ProductRow = {
@@ -235,30 +235,30 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
     }
   };
 
-  const addUnit = () => {
-    setFormData(prev => ({
-      ...prev,
-      units: [...prev.units, { unitCode: 'UND', factor: 1 }]
-    }));
-  };
+  // const addUnit = () => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     units: [...prev.units, { unitCode: 'UND', factor: 1 }]
+  //   }));
+  // };
 
-  const removeUnit = (index: number) => {
-    if (formData.units.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        units: prev.units.filter((_, i) => i !== index)
-      }));
-    }
-  };
+  // const removeUnit = (index: number) => {
+  //   if (formData.units.length > 1) {
+  //     setFormData(prev => ({
+  //       ...prev,
+  //       units: prev.units.filter((_, i) => i !== index)
+  //     }));
+  //   }
+  // };
 
-  const updateUnit = (index: number, field: keyof ProductUnit, value: UnitCode | number) => {
-    setFormData(prev => ({
-      ...prev,
-      units: prev.units.map((unit, i) => 
-        i === index ? { ...unit, [field]: value } : unit
-      )
-    }));
-  };
+  // const updateUnit = (index: number, field: keyof ProductUnit, value: UnitCode | number) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     units: prev.units.map((unit, i) => 
+  //       i === index ? { ...unit, [field]: value } : unit
+  //     )
+  //   }));
+  // };
 
   // Funciones para manejar unidades dinámicas
   const handleCreateUnit = () => {

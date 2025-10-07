@@ -120,7 +120,7 @@ export default function InventoryReportsPage() {
               <div className="p-6">
                 {inventorySummary && inventorySummary.lowStockItems.length > 0 ? (
                   <div className="space-y-4">
-                    {inventorySummary.lowStockItems.map((item: any, index: number) => (
+                    {inventorySummary.lowStockItems.map((item: any) => (
                       <div key={item.productId} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
@@ -159,7 +159,7 @@ export default function InventoryReportsPage() {
               <div className="p-6">
                 {inventorySummary && inventorySummary.outOfStockItems.length > 0 ? (
                   <div className="space-y-4">
-                    {inventorySummary.outOfStockItems.map((item: any, index: number) => (
+                    {inventorySummary.outOfStockItems.map((item: any) => (
                       <div key={item.productId} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">

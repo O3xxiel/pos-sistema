@@ -156,13 +156,13 @@ export default function NewSalePage() {
         
         // Preparar navegación inmediatamente
         const params = new URLSearchParams({
-          folio: confirmedSale.folio || 'N/A',
+          folio: (confirmedSale as any).folio || 'N/A',
           total: currentSale.grandTotal.toString(),
           customer: currentSale.customerName || 'Cliente General'
         });
         
         console.log('NewSale - Preparing navigation with params:', {
-          folio: confirmedSale.folio,
+          folio: (confirmedSale as any).folio,
           total: currentSale.grandTotal,
           customer: currentSale.customerName,
           urlParams: params.toString()

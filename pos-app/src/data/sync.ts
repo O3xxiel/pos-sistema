@@ -528,7 +528,7 @@ export class SyncService {
       .equals('REVIEW_REQUIRED')
       .filter(sale => 
         sale.sellerId === currentSellerId && 
-        sale.lastError?.includes('Venta duplicada')
+        (sale.lastError?.includes('Venta duplicada') ?? false)
       )
       .toArray();
     
@@ -578,7 +578,7 @@ export class SyncService {
       .equals('CONFIRMED')
       .filter(sale => 
         sale.sellerId === currentSellerId && 
-        sale.lastError?.includes('Venta duplicada')
+        (sale.lastError?.includes('Venta duplicada') ?? false)
       )
       .toArray();
     

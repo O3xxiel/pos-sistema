@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { SyncService } from '../data/sync';
-import notificationManager from '../utils/notifications';
+// import notificationManager from '../utils/notifications';
 
 export function useNetwork() {
   const [online, setOnline] = useState(navigator.onLine);

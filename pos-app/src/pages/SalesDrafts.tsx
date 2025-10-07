@@ -13,7 +13,7 @@ export default function SalesDraftsPage() {
 
   // Recargar borradores cuando se regresa a esta página (con debounce para evitar llamadas duplicadas)
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: number;
     
     const handleFocus = () => {
       console.log('🔄 SalesDrafts - Página enfocada, programando recarga...');

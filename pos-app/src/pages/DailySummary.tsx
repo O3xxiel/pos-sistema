@@ -229,7 +229,7 @@ export default function DailySummaryPage() {
             <div className="p-6">
               {summary.topProducts && summary.topProducts.length > 0 ? (
                 <div className="space-y-4">
-                  {summary.topProducts.map((product, index) => (
+                  {summary.topProducts.map((product: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
                         <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -259,7 +259,7 @@ export default function DailySummaryPage() {
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {summary.pendingSales?.sales?.map((sale) => (
+                  {summary.pendingSales?.sales?.map((sale: any) => (
                     <div key={sale.id} className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -283,7 +283,7 @@ export default function DailySummaryPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item, index) => (
+                          {sale.items.map((item: any, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} - {item.quantity} UND - {formatCurrency(item.total)}
                             </p>
@@ -327,7 +327,7 @@ export default function DailySummaryPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {summary.sellers.map((seller) => (
+                  {summary.sellers.map((seller: any) => (
                     <tr key={seller.seller.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{seller.seller.fullName}</div>
@@ -349,7 +349,7 @@ export default function DailySummaryPage() {
                         <div className="text-sm text-gray-900">
                           {seller.topProducts.length > 0 ? (
                             <div className="space-y-1">
-                              {seller.topProducts.slice(0, 2).map((product, index) => (
+                              {seller.topProducts.slice(0, 2).map((product: any, index: number) => (
                                 <div key={index} className="text-xs">
                                   {product.name} ({product.quantity})
                                 </div>

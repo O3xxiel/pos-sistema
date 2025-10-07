@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../../offline/db';
 import { createProduct, updateProduct } from '../../data/catalog';
 import { useStock } from '../../hooks/useStock';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../state/auth';
 import type { ProductRow, UnitCode, ProductUnit } from '../../offline/db';
 
@@ -24,7 +24,6 @@ const fetchUnits = async (accessToken: string) => {
 };
 
 export default function ProductFormSimplified({ product, onSave, onCancel }: ProductFormProps) {
-  const queryClient = useQueryClient();
   const { accessToken, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     sku: '',
@@ -43,7 +42,7 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
   const { getProductStock, loadStock, syncStock } = useStock();
 
   // Query para obtener unidades disponibles
-  const { data: units, isLoading: unitsLoading } = useQuery({
+  const { data: units } = useQuery({
     queryKey: ['units'],
     queryFn: () => fetchUnits(accessToken!),
     enabled: !!accessToken && isAuthenticated,
@@ -148,9 +147,9 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
           // Solo agregar unidades si están disponibles
           if (units && units.length > 0) {
             console.log('🔍 Debug - Updating product - Searching for unit with code:', formData.unitBase);
-            console.log('🔍 Debug - Available units:', units?.map(u => ({ id: u.id, code: u.code, name: u.name })));
+            console.log('🔍 Debug - Available units:', units?.map((u: any) => ({ id: u.id, code: u.code, name: u.name })));
             
-            const selectedUnit = units?.find(u => u.code === formData.unitBase);
+            const selectedUnit = units?.find((u: any) => u.code === formData.unitBase);
             console.log('🔍 Debug - Selected unit found:', selectedUnit);
             
             if (selectedUnit) {
@@ -195,9 +194,9 @@ export default function ProductFormSimplified({ product, onSave, onCancel }: Pro
           // Solo agregar unidades si están disponibles
           if (units && units.length > 0) {
             console.log('🔍 Debug - Searching for unit with code:', formData.unitBase);
-            console.log('🔍 Debug - Available units:', units?.map(u => ({ id: u.id, code: u.code, name: u.name })));
+            console.log('🔍 Debug - Available units:', units?.map((u: any) => ({ id: u.id, code: u.code, name: u.name })));
             
-            const selectedUnit = units?.find(u => u.code === formData.unitBase);
+            const selectedUnit = units?.find((u: any) => u.code === formData.unitBase);
             console.log('🔍 Debug - Selected unit found:', selectedUnit);
             
             if (selectedUnit) {

@@ -115,12 +115,7 @@ export default function UnitsManagement() {
     mutationFn: (id: number) => deleteUnit(id, accessToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['units'] });
-      notificationManager.show({
-        type: 'success',
-        title: '✅ Unidad eliminada',
-        message: 'La unidad de medida se ha eliminado correctamente',
-        duration: 3000
-      });
+      alert('✅ Unidad eliminada correctamente');
     },
     onError: (error: any) => {
       console.error('Error al eliminar unidad:', error);
@@ -128,13 +123,8 @@ export default function UnitsManagement() {
       // Extraer el mensaje del error
       const errorMessage = error.message || 'No se pudo eliminar la unidad';
       
-      // Mostrar notificación de error con información específica
-      notificationManager.show({
-        type: 'error',
-        title: '❌ No se puede eliminar',
-        message: errorMessage,
-        duration: 6000
-      });
+      // Mostrar alerta de error con información específica
+      alert(`❌ No se puede eliminar: ${errorMessage}`);
     },
   });
 

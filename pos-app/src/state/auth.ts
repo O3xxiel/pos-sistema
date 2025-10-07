@@ -39,7 +39,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     console.log('🔐 setSession - Usuario:', { id: userId, username: currentUser.username, roles: currentUser.roles });
     
     // Limpiar TODAS las claves de autenticación existentes
-    const keysToRemove = [];
+    const keysToRemove: string[] = [];
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('auth_') || 
           key === 'current_user_id' ||
@@ -240,7 +240,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     console.log('🧹 clearAllSessions - Limpiando todas las sesiones');
     
     // Limpiar todas las sesiones de todos los usuarios
-    const keysToRemove = [];
+    const keysToRemove: string[] = [];
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('auth_') || 
           key === 'current_user_id' ||

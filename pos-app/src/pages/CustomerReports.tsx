@@ -162,11 +162,11 @@ export default function CustomerReportsPage() {
               <div className="p-6">
                 {topCustomers && topCustomers.length > 0 ? (
                   <div className="space-y-4">
-                    {topCustomers.map((customer: any, index: number) => (
+                    {topCustomers.map((customer: any) => (
                       <div key={customer.customerId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-sm font-bold text-blue-600">#{index + 1}</span>
+                            <span className="text-sm font-bold text-blue-600">#{topCustomers.indexOf(customer) + 1}</span>
                           </div>
                           <div>
                             <p className="font-medium text-gray-900">{customer.customerName}</p>
@@ -201,7 +201,7 @@ export default function CustomerReportsPage() {
               <div className="p-6">
                 {customerActivity && customerActivity.length > 0 ? (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {customerActivity.slice(0, 10).map((customer: any, index: number) => (
+                    {customerActivity.slice(0, 10).map((customer: any) => (
                       <div key={customer.customerId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
