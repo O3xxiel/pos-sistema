@@ -403,7 +403,7 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
               {online ? (
                 stockLoading 
                   ? 'Verificando stock...' 
-                  : hasEnoughStock(selectedProduct.id, quantity * (selectedProduct.units.find(u => u.unitCode === selectedUnit)?.factor || 1))
+                  : hasEnoughStock(selectedProduct.id, baseQuantity)
                     ? 'Agregar'
                     : 'Stock insuficiente'
               ) : (
