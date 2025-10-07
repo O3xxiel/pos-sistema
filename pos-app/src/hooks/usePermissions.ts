@@ -48,6 +48,10 @@ export function usePermissions() {
     return isAdmin();
   };
 
+  const canManageSellers = () => {
+    return isAdmin();
+  };
+
   return {
     isAdmin,
     isSeller,
@@ -60,6 +64,7 @@ export function usePermissions() {
     canViewOwnReports,
     canViewDrafts,
     canManageUsers,
+    canManageSellers,
   };
 }
 
