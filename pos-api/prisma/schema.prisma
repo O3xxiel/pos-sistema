@@ -1,0 +1,299 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/* ===================== USUARIOS & ROLES ===================== */
+model Role {
+  id    Int        @id @default(autoincrement())
+  code  String     @unique   // 'ADMIN', 'SELLER'
+  name  String
+  users UserRole[]
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  username     String     @unique
+  passwordHash String
+  fullName     String
+  email        String?    @unique
+  phone        String?
+  address      String?
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  roles        UserRole[]
+
+  // Relaciones bidireccionales
+  movements    StockMovement[]  // Relación con StockMovement
+  sales        Sale[]           // Relación con Sale
+  purchases    Purchase[]       // Relación con Purchase
+  auditLogs    AuditLog[]       // Relación con AuditLog
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+/* ============================ ENUMS ========================= */
+// Nota: UnitCode ya no es un enum, ahora es un string para permitir unidades personalizadas
+
+enum StockMovementType {
+  SALE        // salida por venta
+  PURCHASE    // entrada por compra
+  ADJUSTMENT  // ajuste manual
+}
+
+enum SaleStatus {
+  DRAFT
+  CONFIRMED
+  PENDING_SYNC      // venta offline pendiente de sincronización
+  REVIEW_REQUIRED   // falta de stock al sincronizar (Política A)
+  CANCELLED
+}
+
+enum PurchaseStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+/* =========================== CATÁLOGO ======================= */
+
+model Unit {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  symbol    String?  // Símbolo opcional (ej: "kg", "m", "L")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  productUnits ProductUnit[]
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  nit       String?  // "CF" o NIT
+  phone     String?
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sales     Sale[]
+}
+
+model Product {
+  id          Int        @id @default(autoincrement())
+  sku         String     @unique
+  name        String
+  barcode     String?    @unique
+  unitBase    String     @default("UND")              // inventario en UND
+  priceBase   Decimal    @db.Decimal(12, 2)           // precio por UND
+  taxRate     Decimal    @default(0) @db.Decimal(5,2) // 0 en MVP
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  units         ProductUnit[]
+  stock         Stock[]
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+  movements     StockMovement[]
+}
+
+model ProductUnit {
+  id         Int       @id @default(autoincrement())
+  productId  Int
+  unitId     Int       // Referencia a la unidad
+  factor     Int       // cuántas unidades base equivale (DOC=12, CAJ=N, BOLSA=30)
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  unit       Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, unitId]) // no repetir unidad por producto
+}
+
+/* ====================== ALMACENES & INVENTARIO ============== */
+model Warehouse {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  stock      Stock[]
+  movements  StockMovement[]
+  sales      Sale[]
+  purchases  Purchase[]
+}
+
+model Stock {
+  id           Int       @id @default(autoincrement())
+  warehouseId  Int
+  productId    Int
+  qty          Int       @default(0)   // existencia actual en UND
+  updatedAt    DateTime  @updatedAt
+
+  warehouse    Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  product      Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([warehouseId, productId]) // una fila por producto+almacén
+}
+
+model StockMovement {
+  id           Int               @id @default(autoincrement())
+  warehouseId  Int
+  productId    Int
+  type         StockMovementType
+  qty          Int               // negativo para SALE; positivo para PURCHASE
+  note         String?
+  createdAt    DateTime          @default(now())
+  userId       Int?              // quién lo originó (opcional)
+  saleId       Int?
+  purchaseId   Int?
+
+  warehouse    Warehouse         @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sale         Sale?             @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  purchase     Purchase?         @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt])
+}
+
+/* ============================ VENTAS ======================== */
+model Sale {
+  id           Int        @id @default(autoincrement())
+  uuid         String?    @unique         // idempotencia (offline)
+  folio        String?    @unique         // asignado al CONFIRMAR
+  status       SaleStatus @default(DRAFT)
+
+  customerId   Int
+  warehouseId  Int
+  sellerId     Int        // User que vendió
+
+  subtotal     Decimal    @db.Decimal(12, 2) @default(0)
+  taxTotal     Decimal    @db.Decimal(12, 2) @default(0)
+  grandTotal   Decimal    @db.Decimal(12, 2) @default(0)
+
+  createdAt    DateTime   @default(now())
+  confirmedAt  DateTime?
+  cancelledAt  DateTime?
+  syncedAt     DateTime?  // cuando se sincronizó (offline)
+  lastError    String?    // último error de sincronización
+  retryCount   Int        @default(0) // intentos de sincronización
+
+  customer     Customer   @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  warehouse    Warehouse  @relation(fields: [warehouseId], references: [id])
+  seller       User       @relation(fields: [sellerId], references: [id])
+  items        SaleItem[]
+  movements    StockMovement[] // movimientos generados por esta venta (al confirmar)
+
+  @@index([createdAt, sellerId])
+}
+
+model SaleItem {
+  id          Int       @id @default(autoincrement())
+  saleId      Int
+  productId   Int
+  unitCode    String
+  qty         Int                        // cantidad en unidad elegida (UND/DOC/CAJ)
+  qtyBase     Int                        // convertida a UND
+  priceUnit   Decimal    @db.Decimal(12, 2) // precio de la unidad elegida
+  discount    Decimal    @db.Decimal(12, 2) @default(0)
+  lineTotal   Decimal    @db.Decimal(12, 2)
+
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+/* ====================== PROVEEDORES & COMPRAS =============== */
+model Supplier {
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  name      String
+  nit       String?
+  phone     String?
+  address   String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  purchases Purchase[]
+}
+
+model Purchase {
+  id           Int             @id @default(autoincrement())
+  uuid         String?         @unique     // idempotencia (si capturas offline)
+  folio        String?         @unique     // numeración interna (opcional)
+  status       PurchaseStatus  @default(DRAFT)
+
+  supplierId   Int
+  warehouseId  Int
+  buyerId      Int                          // User que registró la compra
+
+  subtotal     Decimal         @db.Decimal(12, 2) @default(0)
+  taxTotal     Decimal         @db.Decimal(12, 2) @default(0)
+  grandTotal   Decimal         @db.Decimal(12, 2) @default(0)
+
+  createdAt    DateTime        @default(now())
+  confirmedAt  DateTime?
+  cancelledAt  DateTime?
+
+  supplier     Supplier        @relation(fields: [supplierId], references: [id])
+  warehouse    Warehouse       @relation(fields: [warehouseId], references: [id])
+  buyer        User            @relation(fields: [buyerId], references: [id])
+  items        PurchaseItem[]
+  movements    StockMovement[]               // movimientos generados al confirmar
+
+  @@index([createdAt, buyerId])
+}
+
+model PurchaseItem {
+  id          Int       @id @default(autoincrement())
+  purchaseId  Int
+  productId   Int
+  unitCode    String
+  qty         Int                          // cantidad en la unidad elegida
+  qtyBase     Int                          // convertida a UND (para stock/kardex)
+  costUnit    Decimal     @db.Decimal(12, 2) // costo por la unidad elegida
+  discount    Decimal     @db.Decimal(12, 2) @default(0)
+  lineTotal   Decimal     @db.Decimal(12, 2)
+
+  purchase    Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+
+/* ============================ AUDITORÍA ===================== */
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String   // "SALE_CONFIRM", "SALE_CANCEL", "STOCK_ADJUST", "PURCHASE_CONFIRM", etc.
+  entity    String   // "Sale", "Purchase", "Stock", "Product", etc.
+  entityId  Int?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
