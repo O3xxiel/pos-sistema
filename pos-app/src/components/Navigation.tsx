@@ -215,7 +215,7 @@ export default function Navigation() {
       )}
 
       {/* Desktop Navigation - Solo visible en desktop */}
-      <nav className="hidden lg:flex bg-white shadow-sm border-r border-gray-200 w-64 min-h-screen flex-col">
+      <nav className="hidden md:flex bg-white shadow-sm border-r border-gray-200 w-64 min-h-screen flex-col">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
