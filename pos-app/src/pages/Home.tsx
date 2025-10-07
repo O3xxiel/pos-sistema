@@ -154,16 +154,16 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-4 mb-4">
+      <div className="mb-6 lg:mb-8">
+        <div className="flex items-center space-x-3 lg:space-x-4 mb-4">
           <Logo size="lg" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-xl lg:text-3xl font-bold text-gray-900 mb-2">
               ¡Bienvenido a Surtidora Katy, {user?.fullName || user?.username}! 👋
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm lg:text-base text-gray-600">
               Aquí tienes un resumen de tu sistema de punto de venta
             </p>
           </div>
@@ -216,7 +216,7 @@ export default function Home() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
         {permissions.canManageProducts() && (
           <div className="card">
             <div className="flex items-center">
@@ -282,24 +282,24 @@ export default function Home() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="mb-6 lg:mb-8">
+        <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           {getQuickActions().map((action) => (
             <Link
               key={action.name}
               to={action.href}
-              className="card hover:shadow-md transition-shadow duration-200 cursor-pointer group"
+              className="card hover:shadow-md transition-shadow duration-200 cursor-pointer group min-h-[80px] lg:min-h-auto"
             >
               <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-lg ${action.color} text-white group-hover:scale-110 transition-transform duration-200`}>
+                <div className={`p-2 lg:p-2 rounded-lg ${action.color} text-white group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
                   {action.icon}
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors text-sm lg:text-base">
                     {action.name}
                   </h3>
-                  <p className="text-sm text-gray-500">{action.description}</p>
+                  <p className="text-xs lg:text-sm text-gray-500 hidden sm:block">{action.description}</p>
                 </div>
               </div>
             </Link>
@@ -309,14 +309,27 @@ export default function Home() {
 
       {/* Recent Activity Placeholder */}
       <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Actividad Reciente</h2>
-        <div className="text-center py-8">
-          <svg className="mx-auto w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-4">Actividad Reciente</h2>
+        <div className="text-center py-6 lg:py-8">
+          <svg className="mx-auto w-10 h-10 lg:w-12 lg:h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="text-gray-500">No hay actividad reciente</p>
-          <p className="text-sm text-gray-400 mt-1">Las transacciones aparecerán aquí cuando comiences a usar el sistema</p>
+          <p className="text-gray-500 text-sm lg:text-base">No hay actividad reciente</p>
+          <p className="text-xs lg:text-sm text-gray-400 mt-1">Las transacciones aparecerán aquí cuando comiences a usar el sistema</p>
         </div>
+      </div>
+
+      {/* Mobile Floating Action Button */}
+      <div className="lg:hidden fixed bottom-4 right-4 z-50">
+        <Link
+          to="/sales/new"
+          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
+          title="Nueva Venta"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </Link>
       </div>
     </div>
   );

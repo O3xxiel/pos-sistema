@@ -161,16 +161,16 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/*" element={
             <div className="flex h-screen bg-gray-50">
-              {/* Navegación lateral - Solo en desktop */}
+              {/* Navegación lateral */}
               <Navigation />
               
               {/* Contenido principal */}
-              <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Barra de sincronización */}
                 <SyncBar />
                 
                 {/* Área de contenido */}
-                <main className="flex-1 overflow-auto p-4 lg:p-6">
+                <main className="flex-1 overflow-auto">
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/catalog/products" element={<ProductsPage />} />
