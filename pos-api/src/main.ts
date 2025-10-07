@@ -9,6 +9,7 @@ async function bootstrap() {
     origin: process.env.ALLOWED_ORIGINS?.split(',') || [
       'http://localhost:5173',
       'http://localhost:3001',
+      'https://pos-sistema-c4cy8x16h-oscars-projects-549aeb9c.vercel.app',
       'https://pos-sistema-l6ifc23c9-oscars-projects-549aeb9c.vercel.app',
       'https://pos-sistema-2fjeb327u-oscars-projects-549aeb9c.vercel.app',
     ],
