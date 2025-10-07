@@ -4,6 +4,7 @@ import { createProduct, updateProduct } from '../../data/catalog';
 import { useStock } from '../../hooks/useStock';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../state/auth';
+import { API_URL } from '../../data/api';
 import type { ProductRow, UnitCode, ProductUnit } from '../../offline/db';
 
 interface ProductFormProps {
@@ -14,7 +15,7 @@ interface ProductFormProps {
 
 // API function para obtener unidades disponibles
 const fetchUnits = async (accessToken: string) => {
-  const response = await fetch('/api/catalog/units/all', {
+  const response = await fetch(`${API_URL}/catalog/units/all`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },

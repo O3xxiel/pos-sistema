@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../state/auth';
+import { API_URL } from '../data/api';
 
 // Tipos
 interface Unit {
@@ -16,7 +17,7 @@ interface Unit {
 
 // API functions
 const fetchUnits = async (accessToken: string): Promise<Unit[]> => {
-  const response = await fetch('/api/catalog/units/all', {
+  const response = await fetch(`${API_URL}/catalog/units/all`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     },
@@ -26,7 +27,7 @@ const fetchUnits = async (accessToken: string): Promise<Unit[]> => {
 };
 
 const createUnit = async (unitData: { code: string; name: string; symbol?: string }, accessToken: string): Promise<Unit> => {
-  const response = await fetch('/api/catalog/units-management', {
+  const response = await fetch(`${API_URL}/catalog/units-management`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -39,7 +40,7 @@ const createUnit = async (unitData: { code: string; name: string; symbol?: strin
 };
 
 const updateUnit = async ({ id, ...unitData }: { id: number; code?: string; name?: string; symbol?: string; isActive?: boolean }, accessToken: string): Promise<Unit> => {
-  const response = await fetch(`/api/catalog/units-management/${id}`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ const updateUnit = async ({ id, ...unitData }: { id: number; code?: string; name
 };
 
 const deleteUnit = async (id: number, accessToken: string): Promise<void> => {
-  const response = await fetch(`/api/catalog/units-management/${id}`, {
+  const response = await fetch(`${API_URL}/catalog/units-management/${id}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -64,7 +65,7 @@ const deleteUnit = async (id: number, accessToken: string): Promise<void> => {
     try {
       const errorData = await response.json();
       throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-    } catch (parseError) {
+    } catch {
       // Si no se puede parsear el JSON, usar el mensaje genérico
       throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
@@ -117,7 +118,7 @@ export default function UnitsManagement() {
       queryClient.invalidateQueries({ queryKey: ['units'] });
       alert('✅ Unidad eliminada correctamente');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('Error al eliminar unidad:', error);
       
       // Extraer el mensaje del error
