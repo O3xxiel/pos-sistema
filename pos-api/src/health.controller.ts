@@ -1,12 +1,24 @@
 import { Controller, Get } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
 
-@Controller()
+@Controller('health')
 export class HealthController {
-  constructor(private prisma: PrismaService) {}
-  @Get('health')
-  async health() {
-    const now = await this.prisma.$queryRaw`SELECT NOW()`;
-    return { ok: true, db: 'up', now };
+  @Get()
+  getHealth() {
+    const now = new Date();
+    return {
+      status: 'ok',
+      timestamp: now.toISOString(),
+      localTime: now.toString(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      utcOffset: now.getTimezoneOffset(),
+      serverDate: {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        day: now.getDate(),
+        hours: now.getHours(),
+        minutes: now.getMinutes(),
+        seconds: now.getSeconds()
+      }
+    };
   }
 }
