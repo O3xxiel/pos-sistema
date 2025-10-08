@@ -27,11 +27,23 @@ export class SalesController {
   @Post('confirm')
   @Roles('SELLER')
   async confirmSale(@Body() confirmSaleDto: ConfirmSaleDto, @Req() req: any) {
-    // Si es vendedor, asignar su ID automáticamente
-    if (req.user.roles.includes('SELLER')) {
-      confirmSaleDto.sellerId = req.user.id;
+    try {
+      console.log('🔍 Controller: confirmSale - Datos recibidos:', confirmSaleDto);
+      console.log('🔍 Controller: confirmSale - Usuario:', req.user);
+      
+      // Si es vendedor, asignar su ID automáticamente
+      if (req.user.roles.includes('SELLER')) {
+        confirmSaleDto.sellerId = req.user.id;
+        console.log('🔍 Controller: confirmSale - SellerId asignado:', confirmSaleDto.sellerId);
+      }
+      
+      const result = await this.salesService.createAndConfirmSale(confirmSaleDto);
+      console.log('✅ Controller: confirmSale - Venta creada exitosamente:', result.id);
+      return result;
+    } catch (error) {
+      console.error('❌ Controller: confirmSale - Error:', error);
+      throw error;
     }
-    return this.salesService.createAndConfirmSale(confirmSaleDto);
   }
 
   @Post(':id/confirm')

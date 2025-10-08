@@ -110,7 +110,7 @@ export default function Home() {
           </svg>
         ),
         color: 'bg-green-500 hover:bg-green-600',
-        show: permissions.canManageSales()
+        show: permissions.isSeller() && !permissions.isAdmin()
       },
       {
         name: 'Ver Productos',
@@ -216,49 +216,49 @@ export default function Home() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-0">
         {permissions.canManageProducts() && (
-          <div className="card">
+          <div className="card p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 sm:p-3 rounded-full bg-blue-100">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Productos</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.products.toLocaleString()}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Productos</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.products.toLocaleString()}</p>
               </div>
             </div>
           </div>
         )}
 
         {permissions.canManageCustomers() && (
-          <div className="card">
+          <div className="card p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 sm:p-3 rounded-full bg-purple-100">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                 </svg>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Clientes</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.customers.toLocaleString()}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Clientes</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.customers.toLocaleString()}</p>
               </div>
             </div>
           </div>
         )}
 
-        <div className="card">
+        <div className="card p-3 sm:p-4 lg:p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-orange-100">
-              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 sm:p-3 rounded-full bg-orange-100">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Ventas Pendientes</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pendingSales}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Ventas Pendientes</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.pendingSales}</p>
               {stats.reviewRequired > 0 && (
                 <p className="text-xs text-red-600">{stats.reviewRequired} requieren revisión</p>
               )}
@@ -266,24 +266,24 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card p-3 sm:p-4 lg:p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 sm:p-3 rounded-full bg-green-100">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Última Sincronización</p>
-              <p className="text-sm font-bold text-gray-900">{formatDate(stats.lastSync)}</p>
+            <div className="ml-3 sm:ml-4">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Última Sincronización</p>
+              <p className="text-xs sm:text-sm font-bold text-gray-900">{formatDate(stats.lastSync)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-6 lg:mb-8">
-        <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+      <div className="mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-0">
+        <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Acciones Rápidas</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           {getQuickActions().map((action) => (
             <Link
@@ -320,17 +320,19 @@ export default function Home() {
       </div>
 
       {/* Mobile Floating Action Button */}
-      <div className="lg:hidden fixed bottom-4 right-4 z-50">
-        <Link
-          to="/sales/new"
-          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
-          title="Nueva Venta"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </Link>
-      </div>
+      {permissions.isSeller() && !permissions.isAdmin() && (
+        <div className="lg:hidden fixed bottom-4 right-4 z-50">
+          <Link
+            to="/sales/new"
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
+            title="Nueva Venta"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

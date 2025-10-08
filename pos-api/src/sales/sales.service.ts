@@ -12,10 +12,18 @@ export class SalesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createAndConfirmSale(dto: ConfirmSaleDto) {
-    // Usar transacción para mantener integridad
-    return await this.prisma.$transaction(async (tx) => {
-      // 1. Validar stock disponible para cada ítem
-      await this.validateStockAvailability(tx, dto.items, dto.warehouseId || 1);
+    try {
+      console.log('🔍 Service: createAndConfirmSale - Iniciando transacción');
+      console.log('🔍 Service: createAndConfirmSale - DTO recibido:', dto);
+      
+      // Usar transacción para mantener integridad
+      return await this.prisma.$transaction(async (tx) => {
+        console.log('🔍 Service: createAndConfirmSale - Transacción iniciada');
+        
+        // 1. Validar stock disponible para cada ítem
+        console.log('🔍 Service: createAndConfirmSale - Validando stock...');
+        await this.validateStockAvailability(tx, dto.items, dto.warehouseId || 1);
+        console.log('✅ Service: createAndConfirmSale - Stock validado exitosamente');
 
       // 2. Generar folio único
       const folio = await this.generateFolio(tx);
@@ -80,6 +88,10 @@ export class SalesService {
         items: saleItems,
       };
     });
+    } catch (error) {
+      console.error('❌ Service: createAndConfirmSale - Error:', error);
+      throw error;
+    }
   }
 
   async confirmSale(saleId: number, dto: ConfirmSaleDto) {
@@ -205,8 +217,15 @@ export class SalesService {
     items: SaleItemDto[],
     warehouseId: number,
   ) {
-    const stockValidations = await Promise.all(
-      items.map(async (item) => {
+    const stockValidations: Array<{
+      productId: number;
+      available: number;
+      required: number;
+      remaining: number;
+    }> = [];
+    
+    // Procesar items secuencialmente para evitar problemas de transacción
+    for (const item of items) {
         try {
           const stock = await tx.stock.findUnique({
             where: {
@@ -255,12 +274,12 @@ export class SalesService {
             );
           }
 
-          return {
+          stockValidations.push({
             productId: item.productId,
             available: availableStock,
             required: requiredStock,
             remaining: availableStock - requiredStock,
-          };
+          });
         } catch (error) {
           console.error(
             `Error validating stock for product ${item.productId}:`,
@@ -269,8 +288,7 @@ export class SalesService {
           // Re-lanzar el error para que sea manejado por el método padre
           throw error;
         }
-      }),
-    );
+    }
 
     console.log('Stock validation completed for all items:', stockValidations);
     return stockValidations;
@@ -283,87 +301,95 @@ export class SalesService {
     warehouseId: number,
     sellerId: number,
   ) {
-    const stockUpdates = await Promise.all(
-      items.map(async (item) => {
-        try {
-          // Asegurar que existe un registro de stock
-          const existingStock = await tx.stock.findUnique({
-            where: {
-              warehouseId_productId: {
-                warehouseId,
-                productId: item.productId,
-              },
+    const stockUpdates: Array<{
+      productId: number;
+      previousQty: number;
+      newQty: number;
+      deducted: number;
+      movementId: number | null;
+      error?: string;
+    }> = [];
+    
+    // Procesar items secuencialmente para evitar problemas de transacción
+    for (const item of items) {
+      try {
+        // Asegurar que existe un registro de stock
+        const existingStock = await tx.stock.findUnique({
+          where: {
+            warehouseId_productId: {
+              warehouseId,
+              productId: item.productId,
             },
-          });
+          },
+        });
 
-          if (!existingStock) {
-            console.log(`Creating stock record for product ${item.productId}`);
-            await tx.stock.create({
-              data: {
-                warehouseId,
-                productId: item.productId,
-                qty: 0,
-              },
-            });
-          }
-
-          // Descontar stock
-          const updatedStock = await tx.stock.update({
-            where: {
-              warehouseId_productId: {
-                warehouseId,
-                productId: item.productId,
-              },
-            },
-            data: {
-              qty: {
-                decrement: item.qtyBase,
-              },
-            },
-          });
-
-          // Crear movimiento de stock
-          const stockMovement = await tx.stockMovement.create({
+        if (!existingStock) {
+          console.log(`Creating stock record for product ${item.productId}`);
+          await tx.stock.create({
             data: {
               warehouseId,
               productId: item.productId,
-              type: 'SALE',
-              qty: -item.qtyBase, // Negativo para salidas
-              note: `Sale confirmation - Folio: ${saleId}`,
-              userId: sellerId,
-              saleId,
+              qty: 0,
             },
           });
-
-          console.log(
-            `Stock updated for product ${item.productId}: New qty=${updatedStock.qty}`,
-          );
-          console.log(`Stock movement created: ${stockMovement.id}`);
-
-          return {
-            productId: item.productId,
-            previousQty: updatedStock.qty + item.qtyBase,
-            newQty: updatedStock.qty,
-            deducted: item.qtyBase,
-            movementId: stockMovement.id,
-          };
-        } catch (error) {
-          console.error(
-            `Error processing stock deduction for product ${item.productId}:`,
-            error,
-          );
-          // En caso de error, continuar sin actualizar stock
-          return {
-            productId: item.productId,
-            previousQty: 0,
-            newQty: 0,
-            deducted: item.qtyBase,
-            movementId: null,
-            error: error.message,
-          };
         }
-      }),
-    );
+
+        // Descontar stock
+        const updatedStock = await tx.stock.update({
+          where: {
+            warehouseId_productId: {
+              warehouseId,
+              productId: item.productId,
+            },
+          },
+          data: {
+            qty: {
+              decrement: item.qtyBase,
+            },
+          },
+        });
+
+        // Crear movimiento de stock
+        const stockMovement = await tx.stockMovement.create({
+          data: {
+            warehouseId,
+            productId: item.productId,
+            type: 'SALE',
+            qty: -item.qtyBase, // Negativo para salidas
+            note: `Sale confirmation - Folio: ${saleId}`,
+            userId: sellerId,
+            saleId,
+          },
+        });
+
+        console.log(
+          `Stock updated for product ${item.productId}: New qty=${updatedStock.qty}`,
+        );
+        console.log(`Stock movement created: ${stockMovement.id}`);
+
+        stockUpdates.push({
+          productId: item.productId,
+          previousQty: updatedStock.qty + item.qtyBase,
+          newQty: updatedStock.qty,
+          deducted: item.qtyBase,
+          movementId: stockMovement.id,
+        });
+      } catch (error) {
+        console.error(
+          `Error processing stock deduction for product ${item.productId}:`,
+          error,
+        );
+        // En caso de error, continuar sin actualizar stock
+        stockUpdates.push({
+          productId: item.productId,
+          previousQty: 0,
+          newQty: 0,
+          deducted: item.qtyBase,
+          movementId: null,
+          error: error.message,
+        });
+      }
+    }
 
     return stockUpdates;
   }

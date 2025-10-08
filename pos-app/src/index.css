@@ -306,6 +306,27 @@ textarea:focus {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    background: #f97316; /* orange-500 */
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .menu-toggle:hover {
+    background: #ea580c; /* orange-600 */
+    transform: scale(1.05);
+  }
+  
+  .menu-toggle:active {
+    transform: scale(0.95);
   }
 }
 
@@ -341,14 +362,22 @@ textarea:focus {
   transition: transform 0.3s ease;
 }
 
-/* Sidebar en móvil - oculto por defecto */
+/* Sidebar en móvil - completamente oculto, solo overlay */
 @media (max-width: 1023px) {
   .sidebar {
-    transform: translateX(-100%);
+    display: none; /* Completamente oculto en móvil */
   }
   
   .sidebar.active {
+    display: block; /* Solo visible cuando está activo */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 999;
     transform: translateX(0);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -378,7 +407,10 @@ textarea:focus {
 @media (max-width: 1023px) {
   .main-content {
     width: 100%;
-    padding-top: 60px; /* Espacio para el botón hamburguesa */
+    padding-top: 0; /* Sin padding superior en móvil */
+    padding-left: 0; /* Sin padding lateral en móvil */
+    padding-right: 0;
+    margin-left: 0; /* Sin margen para sidebar */
   }
 }
 
@@ -386,4 +418,53 @@ textarea:focus {
 .app-layout {
   display: flex;
   min-height: 100vh;
+}
+
+@media (max-width: 1023px) {
+  .app-layout {
+    display: block; /* Cambiar a block en móvil para eliminar flex */
+  }
+}
+
+/* ============================================
+   OPTIMIZACIONES PARA MÓVIL
+   ============================================ */
+
+@media (max-width: 1023px) {
+  /* Cards más compactas en móvil */
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: 1fr; /* Una columna en móvil */
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  /* Contenido principal más compacto */
+  .main-content .p-6 {
+    padding: 16px !important;
+  }
+  
+  /* Títulos más pequeños en móvil */
+  .text-2xl {
+    font-size: 1.5rem !important; /* 24px */
+  }
+  
+  .text-3xl {
+    font-size: 1.875rem !important; /* 30px */
+  }
+  
+  /* Espaciado reducido */
+  .mb-6 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* Botones más grandes para touch */
+  .btn, button {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
 }

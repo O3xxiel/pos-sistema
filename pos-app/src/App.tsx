@@ -197,7 +197,7 @@ export default function App() {
               {/* Botón hamburguesa */}
               <button 
                 id="menuToggle" 
-                className="menu-toggle fixed top-4 left-4 z-[1000] lg:hidden bg-orange-500 text-white p-3 rounded-lg shadow-lg"
+                className="menu-toggle lg:hidden"
                 aria-label="Abrir menú"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

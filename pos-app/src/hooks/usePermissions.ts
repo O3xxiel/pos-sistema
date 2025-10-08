@@ -24,6 +24,11 @@ export function usePermissions() {
     return isSeller(); // Solo vendedores pueden gestionar ventas
   };
 
+  const canCreateSales = () => {
+    // Solo vendedores pueden crear ventas, NO administradores
+    return isSeller() && !isAdmin();
+  };
+
   const canViewSales = () => {
     return isAdmin() || isSeller(); // Ambos pueden ver ventas
   };
@@ -58,6 +63,7 @@ export function usePermissions() {
     canManageProducts,
     canManageCustomers,
     canManageSales,
+    canCreateSales,
     canViewSales,
     canViewReports,
     canViewAllReports,
