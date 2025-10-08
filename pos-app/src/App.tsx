@@ -146,6 +146,39 @@ export default function App() {
     };
   }, [loadFromStorage, clearAllSessions, forceLogout, checkForUserChanges]);
 
+  // JavaScript para el toggle del sidebar móvil
+  useEffect(() => {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (!menuToggle || !sidebar || !overlay) return;
+    
+    const toggleSidebar = () => {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    };
+    
+    const closeSidebar = () => {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    };
+    
+    menuToggle.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', closeSidebar);
+    
+    // Cerrar sidebar al hacer clic en un link (opcional)
+    const sidebarLinks = sidebar.querySelectorAll('a');
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+    
+    return () => {
+      menuToggle.removeEventListener('click', toggleSidebar);
+      overlay.removeEventListener('click', closeSidebar);
+    };
+  }, []);
+
   return (
     <>
       <Routes>
@@ -160,12 +193,26 @@ export default function App() {
         {/* Rutas protegidas con layout */}
         <Route element={<ProtectedRoute />}>
           <Route path="/*" element={
-            <div className="flex h-screen bg-gray-50">
+            <div className="app-layout flex h-screen bg-gray-50">
+              {/* Botón hamburguesa */}
+              <button 
+                id="menuToggle" 
+                className="menu-toggle fixed top-4 left-4 z-[1000] lg:hidden bg-orange-500 text-white p-3 rounded-lg shadow-lg"
+                aria-label="Abrir menú"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
+              {/* Overlay */}
+              <div id="sidebarOverlay" className="sidebar-overlay"></div>
+              
               {/* Navegación lateral */}
               <Navigation />
               
               {/* Contenido principal */}
-              <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="main-content flex-1 flex flex-col overflow-hidden">
                 {/* Barra de sincronización */}
                 <SyncBar />
                 

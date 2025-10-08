@@ -225,7 +225,7 @@ export default function Navigation() {
       )}
 
       {/* Desktop Navigation - Solo visible en desktop */}
-      <nav className="hidden md:flex bg-white shadow-sm border-r border-gray-200 w-64 min-h-screen flex-col">
+      <aside id="sidebar" className="sidebar bg-white border-r border-gray-200 sticky top-0 z-40 min-h-screen flex-col desktop-sidebar hidden md:flex w-64">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -291,7 +291,7 @@ export default function Navigation() {
             Cerrar Sesión
           </button>
         </div>
-      </nav>
+      </aside>
     </>
   );
 }
