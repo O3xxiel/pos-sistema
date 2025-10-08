@@ -9,12 +9,23 @@ export class ReportsService {
 
   async getSalesSummary(startDate: string, endDate: string) {
     try {
+      // Crear fechas con zona horaria de Guatemala
+      const startDateGT = new Date(startDate + 'T00:00:00-06:00');
+      const endDateGT = new Date(endDate + 'T23:59:59.999-06:00');
+
+      console.log('📅 Sales Summary - Fechas Guatemala:', {
+        startDate,
+        endDate,
+        startDateGT: startDateGT.toISOString(),
+        endDateGT: endDateGT.toISOString(),
+      });
+
       const sales = await this.prisma.sale.findMany({
         where: {
           status: 'CONFIRMED',
           createdAt: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
+            gte: startDateGT,
+            lte: endDateGT,
           },
         },
         include: {
@@ -75,13 +86,24 @@ export class ReportsService {
     limit: number = 10,
   ) {
     try {
+      // Crear fechas con zona horaria de Guatemala
+      const startDateGT = new Date(startDate + 'T00:00:00-06:00');
+      const endDateGT = new Date(endDate + 'T23:59:59.999-06:00');
+
+      console.log('📅 Top Products - Fechas Guatemala:', {
+        startDate,
+        endDate,
+        startDateGT: startDateGT.toISOString(),
+        endDateGT: endDateGT.toISOString(),
+      });
+
       // Primero obtener las ventas confirmadas en el rango de fechas
       const confirmedSales = await this.prisma.sale.findMany({
         where: {
           status: 'CONFIRMED',
           createdAt: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
+            gte: startDateGT,
+            lte: endDateGT,
           },
         },
         select: {
@@ -150,13 +172,24 @@ export class ReportsService {
 
   async getSalesBySeller(startDate: string, endDate: string) {
     try {
+      // Crear fechas con zona horaria de Guatemala
+      const startDateGT = new Date(startDate + 'T00:00:00-06:00');
+      const endDateGT = new Date(endDate + 'T23:59:59.999-06:00');
+
+      console.log('📅 Sales by Seller - Fechas Guatemala:', {
+        startDate,
+        endDate,
+        startDateGT: startDateGT.toISOString(),
+        endDateGT: endDateGT.toISOString(),
+      });
+
       const sellerSales = await this.prisma.sale.groupBy({
         by: ['sellerId'],
         where: {
           status: 'CONFIRMED',
           createdAt: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
+            gte: startDateGT,
+            lte: endDateGT,
           },
         },
         _sum: {
@@ -263,18 +296,33 @@ export class ReportsService {
 
   async getCustomerSummary(startDate?: string, endDate?: string) {
     try {
+      // Crear fechas con zona horaria de Guatemala si se proporcionan
+      let dateFilter = {};
+      if (startDate && endDate) {
+        const startDateGT = new Date(startDate + 'T00:00:00-06:00');
+        const endDateGT = new Date(endDate + 'T23:59:59.999-06:00');
+
+        console.log('📅 Customer Summary - Fechas Guatemala:', {
+          startDate,
+          endDate,
+          startDateGT: startDateGT.toISOString(),
+          endDateGT: endDateGT.toISOString(),
+        });
+
+        dateFilter = {
+          createdAt: {
+            gte: startDateGT,
+            lte: endDateGT,
+          },
+        };
+      }
+
       const customers = await this.prisma.customer.findMany({
         include: {
           sales: {
             where: {
               status: 'CONFIRMED',
-              ...(startDate &&
-                endDate && {
-                  createdAt: {
-                    gte: new Date(startDate),
-                    lte: new Date(endDate),
-                  },
-                }),
+              ...dateFilter,
             },
             select: {
               grandTotal: true,
@@ -322,13 +370,24 @@ export class ReportsService {
     limit: number = 10,
   ) {
     try {
+      // Crear fechas con zona horaria de Guatemala
+      const startDateGT = new Date(startDate + 'T00:00:00-06:00');
+      const endDateGT = new Date(endDate + 'T23:59:59.999-06:00');
+
+      console.log('📅 Top Customers - Fechas Guatemala:', {
+        startDate,
+        endDate,
+        startDateGT: startDateGT.toISOString(),
+        endDateGT: endDateGT.toISOString(),
+      });
+
       const customerSales = await this.prisma.sale.groupBy({
         by: ['customerId'],
         where: {
           status: 'CONFIRMED',
           createdAt: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
+            gte: startDateGT,
+            lte: endDateGT,
           },
         },
         _sum: {
@@ -382,14 +441,25 @@ export class ReportsService {
 
   async getCustomerActivity(startDate: string, endDate: string) {
     try {
+      // Crear fechas con zona horaria de Guatemala
+      const startDateGT = new Date(startDate + 'T00:00:00-06:00');
+      const endDateGT = new Date(endDate + 'T23:59:59.999-06:00');
+
+      console.log('📅 Customer Activity - Fechas Guatemala:', {
+        startDate,
+        endDate,
+        startDateGT: startDateGT.toISOString(),
+        endDateGT: endDateGT.toISOString(),
+      });
+
       const customers = await this.prisma.customer.findMany({
         include: {
           sales: {
             where: {
               status: 'CONFIRMED',
               createdAt: {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
+                gte: startDateGT,
+                lte: endDateGT,
               },
             },
             select: {
@@ -430,8 +500,15 @@ export class ReportsService {
 
   async getDailyReport(date: string, sellerId?: string, user?: { id: number }) {
     try {
-      const startDate = new Date(date + 'T00:00:00');
-      const endDate = new Date(date + 'T23:59:59.999');
+      // Crear fechas con zona horaria de Guatemala
+      const startDate = new Date(date + 'T00:00:00-06:00');
+      const endDate = new Date(date + 'T23:59:59.999-06:00');
+
+      console.log('📅 Daily Report - Fechas Guatemala:', {
+        date,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
 
       const whereClause: {
         status: 'CONFIRMED';
@@ -667,8 +744,15 @@ export class ReportsService {
     user?: { id: number },
   ) {
     try {
-      const startDate = new Date(date + 'T00:00:00');
-      const endDate = new Date(date + 'T23:59:59.999');
+      // Crear fechas con zona horaria de Guatemala
+      const startDate = new Date(date + 'T00:00:00-06:00');
+      const endDate = new Date(date + 'T23:59:59.999-06:00');
+
+      console.log('📅 Daily Summary - Fechas Guatemala:', {
+        date,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
 
       const whereClause: {
         status: 'CONFIRMED';
