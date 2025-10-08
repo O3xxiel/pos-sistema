@@ -468,3 +468,35 @@ textarea:focus {
     padding: 12px 16px;
   }
 }
+
+/* ============================================
+   FIX PARA SELECT EN iOS
+   ============================================ */
+
+/* Fix para select en iOS */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Asegurar que las options sean visibles en iOS */
+select option {
+  background-color: white;
+  color: black;
+  padding: 10px;
+  font-size: 16px; /* iOS requiere mínimo 16px para no hacer zoom */
+}
+
+/* Fix específico para iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  select {
+    font-size: 16px !important;
+    min-height: 44px; /* Altura mínima táctil de iOS */
+  }
+  
+  select option {
+    font-size: 16px !important;
+    padding: 12px !important;
+  }
+}

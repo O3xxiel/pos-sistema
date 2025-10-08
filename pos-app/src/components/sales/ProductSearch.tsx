@@ -320,6 +320,16 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Unidad
               </label>
+              {/* Debug temporal para iOS */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="p-2 bg-yellow-100 border border-yellow-300 rounded text-xs mb-2">
+                  <p>Units disponibles: {selectedProduct?.units?.length || 0}</p>
+                  <p>Selected: {selectedUnit}</p>
+                  <pre className="text-xs overflow-auto max-h-20">
+                    {JSON.stringify(selectedProduct?.units?.map(u => ({ code: u.unitCode, name: u.unitName, factor: u.factor })), null, 2)}
+                  </pre>
+                </div>
+              )}
               <select
                 value={selectedUnit}
                 onChange={(e) => {
@@ -344,8 +354,21 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
                   setQuantity(newQuantity);
                   setBaseQuantity(newBaseQuantity); // Recalcular cantidad base
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                style={{
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em',
+                  paddingRight: '2.5rem',
+                  fontSize: '16px',
+                  minHeight: '44px'
+                }}
               >
+                <option value="">Selecciona unidad</option>
                 {selectedProduct.units.map((unit) => (
                   <option key={unit.unitCode} value={unit.unitCode}>
                     {unit.unitName || unit.unitCode} {unit.factor > 1 && `(${unit.factor} UND)`}
