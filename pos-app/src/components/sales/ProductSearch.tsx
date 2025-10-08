@@ -321,7 +321,7 @@ const ProductSearch = forwardRef<ProductSearchRef, ProductSearchProps>(({ onProd
                 Unidad
               </label>
               {/* Debug temporal para iOS */}
-              {process.env.NODE_ENV === 'development' && (
+              {import.meta.env.DEV && (
                 <div className="p-2 bg-yellow-100 border border-yellow-300 rounded text-xs mb-2">
                   <p>Units disponibles: {selectedProduct?.units?.length || 0}</p>
                   <p>Selected: {selectedUnit}</p>
