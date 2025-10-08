@@ -17,21 +17,52 @@ export const getCurrentDate = (): string => {
 export const getCurrentDateGT = (): string => {
   const now = new Date();
   
+  // Convertir a zona horaria de Guatemala (UTC-6)
+  const guatemalaTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Guatemala"}));
+  
   // Debug: mostrar información de fechas
-  console.log('🕐 Debug de fechas:');
+  console.log('🕐 Debug de fechas Guatemala:');
   console.log('  - Fecha local:', now.toString());
   console.log('  - UTC:', now.toISOString());
+  console.log('  - Guatemala:', guatemalaTime.toString());
   console.log('  - Zona horaria:', Intl.DateTimeFormat().resolvedOptions().timeZone);
   
-  // Usar la fecha local directamente (más confiable)
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  // Usar la fecha de Guatemala
+  const year = guatemalaTime.getFullYear();
+  const month = String(guatemalaTime.getMonth() + 1).padStart(2, '0');
+  const day = String(guatemalaTime.getDate()).padStart(2, '0');
   const result = `${year}-${month}-${day}`;
   
-  console.log('  - Fecha resultante:', result);
+  console.log('  - Fecha resultante (GT):', result);
   
   return result;
+};
+
+/**
+ * Obtiene la fecha del servidor en formato YYYY-MM-DD
+ * Usa la fecha del servidor para evitar problemas de sincronización
+ */
+export const getServerDateGT = async (): Promise<string> => {
+  try {
+    const response = await fetch('/api/health');
+    if (response.ok) {
+      const data = await response.json();
+      // Extraer la fecha del timestamp del servidor
+      const serverDate = new Date(data.timestamp);
+      const year = serverDate.getFullYear();
+      const month = String(serverDate.getMonth() + 1).padStart(2, '0');
+      const day = String(serverDate.getDate()).padStart(2, '0');
+      const result = `${year}-${month}-${day}`;
+      
+      console.log('🕐 Fecha del servidor:', result);
+      return result;
+    }
+  } catch (error) {
+    console.warn('No se pudo obtener la fecha del servidor, usando fecha local:', error);
+  }
+  
+  // Fallback a fecha local si no se puede obtener la del servidor
+  return getCurrentDateGT();
 };
 
 /**
@@ -64,13 +95,20 @@ export const formatDisplayDateTime = (dateString: string): string => {
 };
 
 /**
- * Crea un rango de fechas para consultas de base de datos
+ * Crea un rango de fechas para consultas de base de datos usando zona horaria de Guatemala
  * @param dateString Fecha en formato YYYY-MM-DD
  * @returns Objeto con startDate y endDate para consultas
  */
 export const createDateRange = (dateString: string) => {
-  const startDate = new Date(dateString + 'T00:00:00');
-  const endDate = new Date(dateString + 'T23:59:59.999');
+  // Crear fechas en zona horaria de Guatemala
+  const startDate = new Date(dateString + 'T00:00:00-06:00'); // UTC-6 (Guatemala)
+  const endDate = new Date(dateString + 'T23:59:59.999-06:00'); // UTC-6 (Guatemala)
+  
+  console.log('📅 Rango de fechas Guatemala:', {
+    dateString,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString()
+  });
   
   return {
     startDate,
