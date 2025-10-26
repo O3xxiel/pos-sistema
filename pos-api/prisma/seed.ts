@@ -40,6 +40,20 @@ async function main() {
     },
   });
 
+  // 4) Segundo Admin (idempotente)
+  const admin2PasswordHash = await bcrypt.hash('SurtidoraKB2025!', 10);
+  const admin2 = await prisma.user.upsert({
+    where: { username: 'adminBL' },
+    update: {},
+    create: {
+      username: 'adminBL',
+      fullName: 'Administrador Surtidora Katy 2',
+      email: 'admin2@surtidorakaty.com',
+      passwordHash: admin2PasswordHash,
+      isActive: true,
+    },
+  });
+
   // 4) Vendedor personalizado (idempotente)
   // NOTA: Cambiar estas credenciales en producción por seguridad
   const sellerPasswordHash = await bcrypt.hash('BrayanL2025!', 10);
@@ -60,6 +74,12 @@ async function main() {
     where: { userId_roleId: { userId: admin.id, roleId: adminRole.id } },
     update: {},
     create: { userId: admin.id, roleId: adminRole.id },
+  });
+
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: admin2.id, roleId: adminRole.id } },
+    update: {},
+    create: { userId: admin2.id, roleId: adminRole.id },
   });
 
   await prisma.userRole.upsert({
@@ -95,7 +115,7 @@ async function main() {
   });
 
   console.log('✅ Seed done:', {
-    admin: admin.username,
+    admins: [admin.username, admin2.username],
     seller: seller.username,
     roles: [adminRole.code, sellerRole.code],
     warehouse: 'Created main warehouse (ID: 1)',
