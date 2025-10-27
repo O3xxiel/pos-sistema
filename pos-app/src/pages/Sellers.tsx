@@ -402,6 +402,17 @@ function SellerModal({ seller, onClose, onSuccess }: {
     if (!validateForm()) return;
 
     const submitData: any = { ...formData };
+    
+    // Limpiar campos opcionales vacíos
+    if (!submitData.email || submitData.email.trim() === '') {
+      delete submitData.email;
+    }
+    if (!submitData.phone || submitData.phone.trim() === '') {
+      delete submitData.phone;
+    }
+    if (!submitData.address || submitData.address.trim() === '') {
+      delete submitData.address;
+    }
     if (seller && !submitData.password) {
       delete submitData.password; // No enviar contraseña vacía en actualización
     }

@@ -22,6 +22,7 @@ export class CreateSellerDto {
   @MaxLength(100)
   fullName: string;
 
+  @IsString()
   @IsEmail()
   @IsOptional()
   email?: string;
@@ -62,6 +63,7 @@ export class UpdateSellerDto {
   @MaxLength(100)
   fullName?: string;
 
+  @IsString()
   @IsEmail()
   @IsOptional()
   email?: string;
