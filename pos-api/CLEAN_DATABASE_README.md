@@ -95,3 +95,7 @@ Si tienes problemas con los scripts, verifica:
 - ✅ Variables de entorno configuradas
 - ✅ Base de datos PostgreSQL accesible
 - ✅ Dependencias instaladas (`pnpm install`)
+
+
+
+

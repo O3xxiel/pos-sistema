@@ -22,7 +22,8 @@
     "seed": "ts-node prisma/seed.ts",
     "seed:products": "ts-node prisma/seed-products.ts",
     "clean:db": "ts-node clean-database.ts",
-    "clean:db:safe": "ts-node clean-database-safe.ts"
+    "clean:db:safe": "ts-node clean-database-safe.ts",
+    "clean:products-customers": "ts-node clean-products-customers.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
