@@ -780,7 +780,7 @@ export class ReportsService {
               productId: true,
               qty: true,
               lineTotal: true,
-              product: { select: { name: true } },
+              product: { select: { name: true, sku: true } },
             },
           },
         },
@@ -817,10 +817,10 @@ export class ReportsService {
         },
       });
 
-      // Calcular productos más vendidos de forma más eficiente
+      // Calcular TODOS los productos vendidos de forma más eficiente
       const productSales = new Map<
         number,
-        { name: string; quantity: number; amount: number }
+        { name: string; sku: string; quantity: number; amount: number }
       >();
       sales.forEach((sale) => {
         sale.items.forEach((item) => {
@@ -828,6 +828,7 @@ export class ReportsService {
           if (!productSales.has(key)) {
             productSales.set(key, {
               name: item.product?.name || 'Producto no encontrado',
+              sku: item.product?.sku || 'N/A',
               quantity: 0,
               amount: 0,
             });
@@ -838,9 +839,9 @@ export class ReportsService {
         });
       });
 
-      const topProducts = Array.from(productSales.values())
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 10);
+      // Devolver TODOS los productos ordenados por cantidad (descendente)
+      const allProducts = Array.from(productSales.values())
+        .sort((a, b) => b.quantity - a.quantity);
 
       // Calcular métricas por vendedor de forma más eficiente
       const sellersData = Array.from(uniqueSellers.values()).map((seller) => {
@@ -938,7 +939,7 @@ export class ReportsService {
           totalSellers,
           pendingSync: pendingSales.length,
         },
-        topProducts,
+        topProducts: allProducts,
         sellers: sellersData,
         pendingSales: {
           count: pendingSales.length,

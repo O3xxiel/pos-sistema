@@ -221,10 +221,10 @@ export default function DailySummaryPage() {
             </div>
           </div>
 
-          {/* Top Productos Generales */}
+          {/* Productos Vendidos */}
           <div className="bg-white rounded-lg shadow mb-8">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Top Productos del Día</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Productos Vendidos</h3>
             </div>
             <div className="p-6">
               {summary.topProducts && summary.topProducts.length > 0 ? (
@@ -235,11 +235,15 @@ export default function DailySummaryPage() {
                         <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
                           {index + 1}
                         </span>
-                        <p className="ml-3 font-medium text-gray-900">{product.name}</p>
+                        <div className="ml-4">
+                          <p className="font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500">{product.sku || 'N/A'}</p>
+                        </div>
                       </div>
-                      <p className="text-gray-700">
-                        {product.quantity} UND ({formatCurrency(product.amount)})
-                      </p>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">{product.quantity} UND</p>
+                        <p className="text-sm text-gray-500">{formatCurrency(product.amount)}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
