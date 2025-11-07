@@ -6,89 +6,114 @@ import { usePermissions } from '../hooks/usePermissions';
 import { SyncService } from '../data/sync';
 import { getCurrentDateGT, formatDisplayDate } from '../utils/dateUtils';
 
-// interface DailyReportData {
-//   date: string;
-//   seller: {
-//     id: number;
-//     username: string;
-//     fullName: string;
-//   };
-//   summary: {
-//     totalSales: number;
-//     totalAmount: number;
-//     totalQuantity: number;
-//     averageTicket: number;
-//     pendingSync: number;
-//   };
-//   topProducts: Array<{
-//     productId: number;
-//     productName: string;
-//     productSku: string;
-//     quantity: number;
-//     amount: number;
-//     sales: number;
-//   }>;
-//   peakHours: Array<{
-//     hour: number;
-//     amount: number;
-//   }>;
-//   hourlySummary: Array<{
-//     hour: number;
-//     amount: number;
-//     sales: number;
-//   }>;
-//   pendingSales: {
-//     count: number;
-//     totalAmount: number;
-//     sales: Array<{
-//       id: number;
-//       uuid: string;
-//       customerName: string;
-//       total: number;
-//       createdAt: string;
-//       items: Array<{
-//         productName: string;
-//         quantity: number;
-//         unitPrice: number;
-//         total: number;
-//       }>;
-//     }>;
-//   };
-//   dailySales: Array<{
-//     id: number;
-//     folio: string;
-//     customerName: string;
-//     customerCode: string;
-//     total: number;
-//     confirmedAt: string;
-//     items: Array<{
-//       productName: string;
-//       productSku: string;
-//       quantity: number;
-//       unitPrice: number;
-//       total: number;
-//     }>;
-//   };
-// }
+import type { OfflineSaleItem as DBOfflineSaleItem } from '../offline/db';
 
-// interface Seller {
-//   id: number;
-//   username: string;
-//   fullName: string;
-//   role: string;
-//   roleCode: string;
-// }
+interface SaleItem {
+  productName: string;
+  productSku: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+interface PendingSaleItem extends SaleItem {
+}
+
+interface OfflineSaleUI {
+  id: string;
+  customerName: string;
+  status: string;
+  createdAt: string;
+  grandTotal: number;
+  items: DBOfflineSaleItem[];
+}
+
+interface Sale {
+  id: number;
+  folio: string;
+  customerName: string;
+  customerCode: string;
+  total: number;
+  confirmedAt: string;
+  items: SaleItem[];
+}
+
+interface PendingSale {
+  id: number;
+  uuid: string;
+  customerName: string;
+  total: number;
+  createdAt: string;
+  items: PendingSaleItem[];
+}
+
+interface PendingSales {
+  count: number;
+  totalAmount: number;
+  sales: PendingSale[];
+}
+
+interface Product {
+  productId: number;
+  productName: string;
+  productSku: string;
+  quantity: number;
+  amount: number;
+  sales: number;
+}
+
+interface PeakHour {
+  hour: number;
+  amount: number;
+}
+
+interface HourlySummary {
+  hour: number;
+  amount: number;
+  sales: number;
+}
+
+interface Summary {
+  totalSales: number;
+  totalAmount: number;
+  totalQuantity: number;
+  averageTicket: number;
+  pendingSync: number;
+}
+
+interface Seller {
+  id: number;
+  username: string;
+  fullName: string;
+  role: string;
+  roleCode: string;
+}
+
+interface DailyReportData {
+  date: string;
+  seller: {
+    id: number;
+    username: string;
+    fullName: string;
+  };
+  summary: Summary;
+  topProducts: Product[];
+  peakHours: PeakHour[];
+  hourlySummary: HourlySummary[];
+  pendingSales: PendingSales;
+  dailySales: Sale[];
+}
 
 export default function DailyReportPage() {
   const { user } = useAuth();
   const permissions = usePermissions();
   const [selectedDate, setSelectedDate] = useState(getCurrentDateGT);
   const [selectedSellerId, setSelectedSellerId] = useState<string>('me');
-  const [offlinePendingSales, setOfflinePendingSales] = useState<any[]>([]);
+  const [offlinePendingSales, setOfflinePendingSales] = useState<OfflineSaleUI[]>([]);
   const [offlinePendingCount, setOfflinePendingCount] = useState(0);
 
   // Query para obtener la lista de vendedores
-  const { data: sellersData } = useQuery({
+  const { data: sellersData } = useQuery<{ sellers: Seller[] }>({
     queryKey: ['reportSellers'],
     queryFn: getReportSellers,
     enabled: !!user,
@@ -101,12 +126,12 @@ export default function DailyReportPage() {
       setSelectedSellerId('me');
     } else if (permissions.canViewAllReports() && sellersData?.sellers && sellersData.sellers.length > 0) {
       // Para administradores, seleccionar el primer vendedor disponible si no hay uno seleccionado
-      const firstSeller = sellersData.sellers.find((seller: any) => seller.roleCode !== 'ADMIN');
+      const firstSeller = sellersData.sellers.find(seller => seller.roleCode !== 'ADMIN');
       if (firstSeller && selectedSellerId === 'me') {
         setSelectedSellerId(firstSeller.id.toString());
       }
     }
-  }, [permissions, sellersData]);
+  }, [permissions, sellersData, selectedSellerId]);
 
   // Cargar ventas offline pendientes
   useEffect(() => {
@@ -149,7 +174,7 @@ export default function DailyReportPage() {
   }, [selectedSellerId, permissions]);
 
   // Query para obtener el reporte diario
-  const { data: report, isLoading, error, refetch } = useQuery({
+  const { data: report, isLoading, error, refetch } = useQuery<DailyReportData>({
     queryKey: ['dailyReport', selectedDate, selectedSellerId],
     queryFn: () => getDailyReport(selectedDate, selectedSellerId),
     enabled: !!user,
@@ -216,7 +241,7 @@ export default function DailyReportPage() {
         <p className="text-gray-600">
           {selectedSellerId === 'me' 
             ? (report?.seller?.fullName || 'Vendedor') 
-            : (sellersData?.sellers?.find((s: any) => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor')
+            : (sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor')
           } - {formatDisplayDate(selectedDate)}
         </p>
       </div>
@@ -248,8 +273,8 @@ export default function DailyReportPage() {
                 disabled={!permissions.canViewAllReports()}
               >
                 {sellersData.sellers
-                  .filter((seller: any) => seller.roleCode !== 'ADMIN') // Ocultar admins
-                  .map((seller: any) => (
+                  .filter(seller => seller.roleCode !== 'ADMIN') // Ocultar admins
+                  .map(seller => (
                     <option key={seller.id} value={seller.id.toString()}>
                       {seller.fullName} ({seller.role})
                     </option>
@@ -335,20 +360,17 @@ export default function DailyReportPage() {
             </div>
           </div>
 
-          {/* Top Productos */}
+          {/* Productos Vendidos */}
           <div className="bg-white rounded-lg shadow mb-8">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Top Productos</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Productos Vendidos</h3>
             </div>
             <div className="p-6">
               {report.topProducts && report.topProducts.length > 0 ? (
                 <div className="space-y-4">
-                  {report.topProducts.map((product: any, index: number) => (
+                  {report.topProducts.map((product: Product) => (
                     <div key={product.productId} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
-                        <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">
-                          {index + 1}
-                        </span>
                         <div className="ml-4">
                           <p className="font-medium text-gray-900">{product.productName}</p>
                           <p className="text-sm text-gray-500">{product.productSku}</p>
@@ -375,7 +397,7 @@ export default function DailyReportPage() {
             <div className="p-6">
               {report.peakHours && report.peakHours.length > 0 ? (
                 <div className="space-y-4">
-                  {report.peakHours.map((hour: any, index: number) => (
+                  {report.peakHours.map((hour: PeakHour, index: number) => (
                     <div key={hour.hour} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
                         <span className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -453,7 +475,7 @@ export default function DailyReportPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item: any, index: number) => (
+                          {sale.items.map((item: DBOfflineSaleItem, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} - {item.qty} {item.unitCode} - Q {item.lineTotal.toFixed(2)}
                             </p>
@@ -477,7 +499,7 @@ export default function DailyReportPage() {
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {report.pendingSales?.sales?.map((sale: any) => (
+                  {report.pendingSales?.sales?.map((sale: PendingSale) => (
                     <div key={sale.id} className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -494,7 +516,7 @@ export default function DailyReportPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item: any, index: number) => (
+                          {sale.items.map((item: SaleItem, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} - {item.quantity} UND - {formatCurrency(item.total)}
                             </p>
@@ -518,7 +540,7 @@ export default function DailyReportPage() {
             <div className="p-6">
               {report.dailySales && report.dailySales.length > 0 ? (
                 <div className="space-y-4">
-                  {report.dailySales.map((sale: any) => (
+                  {report.dailySales.map((sale: Sale) => (
                     <div key={sale.id} className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -539,7 +561,7 @@ export default function DailyReportPage() {
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">Productos:</p>
                         <div className="mt-1 space-y-1">
-                          {sale.items.map((item: any, index: number) => (
+                          {sale.items.map((item: SaleItem, index: number) => (
                             <p key={index} className="text-sm text-gray-500">
                               {item.productName} ({item.productSku}) - {item.quantity} UND - {formatCurrency(item.total)}
                             </p>
