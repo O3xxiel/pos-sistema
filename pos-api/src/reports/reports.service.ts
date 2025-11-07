@@ -631,8 +631,7 @@ export class ReportsService {
       });
 
       const topProducts = Array.from(productSales.values())
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 10);
+        .sort((a, b) => b.quantity - a.quantity); // Ordenar por cantidad y retornar todos
 
       // Calcular horas pico de forma más eficiente
       const hourlyData = new Map<
