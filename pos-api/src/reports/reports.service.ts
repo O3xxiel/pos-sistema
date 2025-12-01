@@ -594,7 +594,14 @@ export class ReportsService {
         fullName: string;
         username: string;
       } | null = null;
-      if (sellerId && sellerId !== 'me') {
+      if (sellerId === 'me' && user?.id) {
+        // Si es 'me', obtener la información del usuario autenticado
+        sellerInfo = await this.prisma.user.findUnique({
+          where: { id: user.id },
+          select: { id: true, fullName: true, username: true },
+        });
+      } else if (sellerId && sellerId !== 'me') {
+        // Si es un ID específico, obtener ese vendedor
         sellerInfo = await this.prisma.user.findUnique({
           where: { id: parseInt(sellerId) },
           select: { id: true, fullName: true, username: true },
@@ -656,12 +663,20 @@ export class ReportsService {
         (a, b) => a.hour - b.hour,
       );
 
+      // Si no se encontró sellerInfo pero tenemos el usuario autenticado, usarlo
+      if (!sellerInfo && user?.id) {
+        sellerInfo = await this.prisma.user.findUnique({
+          where: { id: user.id },
+          select: { id: true, fullName: true, username: true },
+        });
+      }
+
       return {
         date,
         seller: sellerInfo || {
-          id: 0,
-          username: 'me',
-          fullName: 'Vendedor Actual',
+          id: user?.id || 0,
+          username: user?.username || 'me',
+          fullName: user?.fullName || 'Vendedor',
         },
         summary: {
           totalSales,
