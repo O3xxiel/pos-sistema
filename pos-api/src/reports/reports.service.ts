@@ -498,7 +498,7 @@ export class ReportsService {
 
   // ========== REPORTE DIARIO ==========
 
-  async getDailyReport(date: string, sellerId?: string, user?: { id: number }) {
+  async getDailyReport(date: string, sellerId?: string, user?: { id: number; username?: string; roles?: string[] }) {
     try {
       // Crear fechas con zona horaria de Guatemala
       const startDate = new Date(date + 'T00:00:00-06:00');
@@ -594,18 +594,31 @@ export class ReportsService {
         fullName: string;
         username: string;
       } | null = null;
+      
       if (sellerId === 'me' && user?.id) {
         // Si es 'me', obtener la información del usuario autenticado
+        console.log('🔍 [REPORTS] Obteniendo información del vendedor "me" con user.id:', user.id);
         sellerInfo = await this.prisma.user.findUnique({
           where: { id: user.id },
           select: { id: true, fullName: true, username: true },
         });
+        console.log('✅ [REPORTS] sellerInfo obtenido:', sellerInfo);
       } else if (sellerId && sellerId !== 'me') {
         // Si es un ID específico, obtener ese vendedor
+        console.log('🔍 [REPORTS] Obteniendo información del vendedor con ID:', sellerId);
         sellerInfo = await this.prisma.user.findUnique({
           where: { id: parseInt(sellerId) },
           select: { id: true, fullName: true, username: true },
         });
+        console.log('✅ [REPORTS] sellerInfo obtenido:', sellerInfo);
+      } else if (!sellerId && user?.id) {
+        // Si no se especifica sellerId pero tenemos usuario autenticado, usarlo
+        console.log('🔍 [REPORTS] No hay sellerId, usando usuario autenticado:', user.id);
+        sellerInfo = await this.prisma.user.findUnique({
+          where: { id: user.id },
+          select: { id: true, fullName: true, username: true },
+        });
+        console.log('✅ [REPORTS] sellerInfo obtenido:', sellerInfo);
       }
 
       // Calcular productos más vendidos de forma más eficiente
@@ -663,21 +676,44 @@ export class ReportsService {
         (a, b) => a.hour - b.hour,
       );
 
-      // Si no se encontró sellerInfo pero tenemos el usuario autenticado, usarlo
+      // Si no se encontró sellerInfo pero tenemos el usuario autenticado, intentar obtenerlo
       if (!sellerInfo && user?.id) {
+        console.log('⚠️ [REPORTS] sellerInfo es null, intentando obtener usuario autenticado:', user.id);
         sellerInfo = await this.prisma.user.findUnique({
           where: { id: user.id },
           select: { id: true, fullName: true, username: true },
         });
+        console.log('✅ [REPORTS] sellerInfo obtenido en fallback:', sellerInfo);
       }
+
+      // Construir el objeto seller final
+      // Si sellerInfo es null, intentar obtenerlo una vez más del usuario autenticado
+      if (!sellerInfo && user?.id) {
+        console.log('🔄 [REPORTS] Último intento: obteniendo sellerInfo del usuario autenticado');
+        try {
+          sellerInfo = await this.prisma.user.findUnique({
+            where: { id: user.id },
+            select: { id: true, fullName: true, username: true },
+          });
+          console.log('✅ [REPORTS] sellerInfo obtenido en último intento:', sellerInfo);
+        } catch (error) {
+          console.error('❌ [REPORTS] Error obteniendo sellerInfo:', error);
+        }
+      }
+      
+      const finalSeller = sellerInfo || {
+        id: user?.id || 0,
+        username: user?.username || 'me',
+        fullName: 'Vendedor', // user no tiene fullName en el JWT, pero esto no debería pasar si la BD tiene el fullName
+      };
+      
+      console.log('📋 [REPORTS] seller final que se devolverá:', finalSeller);
+      console.log('📋 [REPORTS] sellerId recibido:', sellerId);
+      console.log('📋 [REPORTS] user recibido:', user);
 
       return {
         date,
-        seller: sellerInfo || {
-          id: user?.id || 0,
-          username: user?.username || 'me',
-          fullName: user?.fullName || 'Vendedor',
-        },
+        seller: finalSeller,
         summary: {
           totalSales,
           totalAmount: totalRevenue,
