@@ -5,6 +5,7 @@ import { useAuth } from '../state/auth';
 import { usePermissions } from '../hooks/usePermissions';
 import { SyncService } from '../data/sync';
 import { getCurrentDateGT, formatDisplayDate } from '../utils/dateUtils';
+import { usePdfGenerator } from '../hooks/usePdfGenerator';
 
 import type { OfflineSaleItem as DBOfflineSaleItem } from '../offline/db';
 
@@ -111,6 +112,9 @@ export default function DailyReportPage() {
   const [selectedSellerId, setSelectedSellerId] = useState<string>('me');
   const [offlinePendingSales, setOfflinePendingSales] = useState<OfflineSaleUI[]>([]);
   const [offlinePendingCount, setOfflinePendingCount] = useState(0);
+  const [isGeneratingProductsPdf, setIsGeneratingProductsPdf] = useState(false);
+  const [isGeneratingSalesPdf, setIsGeneratingSalesPdf] = useState(false);
+  const { generateProductsPdf, generateSalesPdf } = usePdfGenerator();
 
   // Query para obtener la lista de vendedores
   const { data: sellersData } = useQuery<{ sellers: Seller[] }>({
@@ -199,6 +203,52 @@ export default function DailyReportPage() {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const handleExportProductsPdf = async () => {
+    if (!report || !report.topProducts || report.topProducts.length === 0) {
+      alert('No hay productos para exportar');
+      return;
+    }
+
+    setIsGeneratingProductsPdf(true);
+    try {
+      const sellerName = selectedSellerId === 'me' 
+        ? (report?.seller?.fullName || 'Vendedor') 
+        : (sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor');
+      
+      const pdf = await generateProductsPdf(report.topProducts, sellerName, selectedDate);
+      const fileName = `productos-vendidos-${selectedDate}-${sellerName.replace(/\s+/g, '-')}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Error generando PDF de productos:', error);
+      alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+    } finally {
+      setIsGeneratingProductsPdf(false);
+    }
+  };
+
+  const handleExportSalesPdf = async () => {
+    if (!report || !report.dailySales || report.dailySales.length === 0) {
+      alert('No hay ventas para exportar');
+      return;
+    }
+
+    setIsGeneratingSalesPdf(true);
+    try {
+      const sellerName = selectedSellerId === 'me' 
+        ? (report?.seller?.fullName || 'Vendedor') 
+        : (sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor');
+      
+      const pdf = await generateSalesPdf(report.dailySales, sellerName, selectedDate);
+      const fileName = `ventas-del-dia-${selectedDate}-${sellerName.replace(/\s+/g, '-')}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Error generando PDF de ventas:', error);
+      alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+    } finally {
+      setIsGeneratingSalesPdf(false);
+    }
   };
 
   if (!permissions.canViewReports()) {
@@ -362,8 +412,27 @@ export default function DailyReportPage() {
 
           {/* Productos Vendidos */}
           <div className="bg-white rounded-lg shadow mb-8">
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Productos Vendidos</h3>
+              <button
+                onClick={handleExportProductsPdf}
+                disabled={isGeneratingProductsPdf || !report?.topProducts || report.topProducts.length === 0}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isGeneratingProductsPdf ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Generando...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Exportar PDF</span>
+                  </>
+                )}
+              </button>
             </div>
             <div className="p-6">
               {report.topProducts && report.topProducts.length > 0 ? (
@@ -532,10 +601,29 @@ export default function DailyReportPage() {
 
           {/* Ventas del Día */}
           <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">
                 Ventas del Día ({report.dailySales?.length || 0})
               </h3>
+              <button
+                onClick={handleExportSalesPdf}
+                disabled={isGeneratingSalesPdf || !report?.dailySales || report.dailySales.length === 0}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isGeneratingSalesPdf ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Generando...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Exportar PDF</span>
+                  </>
+                )}
+              </button>
             </div>
             <div className="p-6">
               {report.dailySales && report.dailySales.length > 0 ? (
