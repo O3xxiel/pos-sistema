@@ -213,9 +213,13 @@ export default function DailyReportPage() {
 
     setIsGeneratingProductsPdf(true);
     try {
-      const sellerName = selectedSellerId === 'me' 
-        ? (report?.seller?.fullName || 'Vendedor') 
-        : (sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor');
+      let sellerName = 'Vendedor';
+      if (selectedSellerId === 'me') {
+        sellerName = report?.seller?.fullName || user?.fullName || user?.username || 'Vendedor';
+      } else {
+        const selectedSeller = sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId);
+        sellerName = selectedSeller?.fullName || 'Vendedor';
+      }
       
       const pdf = await generateProductsPdf(report.topProducts, sellerName, selectedDate);
       const fileName = `productos-vendidos-${selectedDate}-${sellerName.replace(/\s+/g, '-')}.pdf`;
@@ -236,9 +240,13 @@ export default function DailyReportPage() {
 
     setIsGeneratingSalesPdf(true);
     try {
-      const sellerName = selectedSellerId === 'me' 
-        ? (report?.seller?.fullName || 'Vendedor') 
-        : (sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId)?.fullName || 'Vendedor');
+      let sellerName = 'Vendedor';
+      if (selectedSellerId === 'me') {
+        sellerName = report?.seller?.fullName || user?.fullName || user?.username || 'Vendedor';
+      } else {
+        const selectedSeller = sellersData?.sellers?.find(s => s.id.toString() === selectedSellerId);
+        sellerName = selectedSeller?.fullName || 'Vendedor';
+      }
       
       const pdf = await generateSalesPdf(report.dailySales, sellerName, selectedDate);
       const fileName = `ventas-del-dia-${selectedDate}-${sellerName.replace(/\s+/g, '-')}.pdf`;
